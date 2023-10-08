@@ -1,7 +1,6 @@
 ---
 title: Session 0 - prerequisites
-slug: /
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # Setting up your environment
@@ -18,6 +17,8 @@ You need the following software:
 - Google Chrome (I know not everyone uses Chrome, but the dev tools it provides are the industry standard and it will be easier to deal with web scraping if everyone has the same tooling)
 - something to write your code in (an IDE, see [FAQ](#what-do-i-write-my-code-inwhich-ide-do-i-use)).
 - something to write your reports in (a LaTeX editor, see [FAQ](#what-do-i-use-for-writing-reports)).
+
+I have tested the below instructions on all three environments and they seem to work, but I would be really surprised if noone ran into any issues, that being said, here we go.
 
 ## Install software
 
@@ -49,11 +50,17 @@ This is now a fully-functioning Linux installation that you can access anytime b
 
 **Install Docker Desktop**
 
-Get [Docker Desktop](https://www.docker.com/products/docker-desktop/) and install it. **Make sure that `use WSL2 instead of Hyper-V` is checked**. Once done, **restart the computer.**
+Get [Docker Desktop](https://www.docker.com/products/docker-desktop/) and install it. **Make sure that `use WSL2 instead of Hyper-V` is checked on the first screen of the installer**. Once done, **restart the computer.**
+
+Remember, to use Docker, it needs to be running in the background (look for the whale in the bottom-right of your screen), if it isn't start it by running the Docker Desktop app.
 
 **Installing other prerequisites inside WSL**
 
 Now that we have a linux terminal, you can paste and run the commands below into the Ubuntu app.
+
+_Note: some of the tools (like git) are very likely already installed, don't worry, the command will skip them._
+
+_Note: yes it is very dangerous to copy commands starting with sudo from some random guy on the internet, but just trust me ;)._
 
 ```bash
 # Git
@@ -283,7 +290,6 @@ Table of aliases set by the commands above:
 | `docker-compose logs`          | `dcl`       |
 | `docker-compose logs -f`       | `dclf`      |
 
-If you try to keep track of commands you use frequently, you can add your own aliases to shorten those too.
 
 ## FAQ
 
@@ -318,3 +324,4 @@ Use whatever works on your machine. The reason you see these two alternatives is
 - From now on, every bit of code you write belongs into git (and hopefully, Github too as you get unlimited private repositories for free so no one but you needs to see the disgusting bowl of spaghetti code you wrote sunday night, 28 minutes before the deadline). This will save your work from when your system dies, or you need to work on another computer and keep your work in sync or you accidentally debug your code into an even worse state than it was and need to revert.
 - Look up keyboard shortcuts for your IDE (there are nice cheatsheets: [VSCode](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf), [PyCharm](https://resources.jetbrains.com/storage/products/pycharm/docs/PyCharm_ReferenceCard.pdf)) and get used to them. It's a pain in the beginning but really starts to pay off. You will also notice that a lot of the default keyboard shortcuts are clunky to press on the Slovenian layout. This is why some of us switched to the English keyboard layout where the default shortcuts are natural.
 - Get used to the terminal. If you know what you want to do, it is often faster doing it in the terminal than with a mouse. There are useful commands like `time python main.py` which will time your python script etc. It also comes in handy when you are running code remotely on more powerful machines, where you don't even have a GUI.
+- Try to keep track of commands you use frequently, you can add your own aliases to shorten those too and improve your efficiency.
