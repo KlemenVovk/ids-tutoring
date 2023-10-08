@@ -9,11 +9,7 @@ const config = {
   title: 'IDS 2023/24 tutoring',
   tagline: 'Data science tutoring for the course Introduction to Data Science at UL FRI',
   favicon: 'img/favicon.png',
-
-  // Set the production url of your site here
   url: 'https://github.com',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/ids-tutoring/',
   organizationName: 'KlemenVovk',
   projectName: 'ids-tutoring',
@@ -21,10 +17,6 @@ const config = {
   trailingSlash: false,
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-
-  // Even if you don't use internalization, you can use this field to set useful
-  // metadata like html lang. For example, if your site is Chinese, you may want
-  // to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -41,7 +33,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/KlemenVovk/ids-tutoring/edit/master/docs/',
         },
         blog: false
         
@@ -60,7 +52,7 @@ const config = {
         },
         items: [
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/KlemenVovk/ids-tutoring',
             label: 'GitHub',
             position: 'right',
           },
