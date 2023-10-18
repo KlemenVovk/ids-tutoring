@@ -58,9 +58,13 @@ Remember, to use Docker, it needs to be running in the background (look for the 
 
 Now that we have a linux terminal, you can paste and run the commands below into the Ubuntu app.
 
-_Note: some of the tools (like git) are very likely already installed, don't worry, the command will skip them._
+:::note
+some of the tools (like git) are very likely already installed, don't worry, the command will skip them.
+:::
 
-_Note: yes it is very dangerous to copy commands starting with sudo from some random guy on the internet, but just trust me ;)._
+:::danger
+Yes it is very dangerous to copy commands starting with sudo from some random guy on the internet, but just trust me ;).
+:::
 
 ```bash
 # Git
@@ -124,9 +128,13 @@ Remember, to use Docker, it needs to be running in the background (look for the 
     <summary>Linux</summary>
 The below instructions are for Ubuntu/Debian-based linux distributions. If you use anything else contact me should you require assistance.
 
-_Note: some of the tools (like git) are very likely already installed, don't worry, the command will skip them._
+:::note
+Some of the tools (like git) are very likely already installed, don't worry, the command will skip them.
+:::
 
-_Note: yes it is very dangerous to copy commands starting with sudo from some random guy on the internet, but just trust me ;)._
+:::note
+Yes it is very dangerous to copy commands starting with sudo from some random guy on the internet, but just trust me ;).
+:::
 
 Copy and paste everything below into a terminal and hit ENTER.
 

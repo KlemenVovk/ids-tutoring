@@ -12,9 +12,13 @@ What do we want to achieve? In layman's terms, if someone clones your repository
 - Conda/pip/poetry - (these are Python specific), you will likely use some external libraries for your work (e.g. pandas, scikit, torch, etc.), so to run your code these must be installed. These tools define what libraries are used in a single text file and then try to recreate that environment on any PC with a single command.
 - Docker - if your model or API needs to be deployed in production, you put it in a Docker container, more on this in a later tutoring session.
 
-*Note: these tools enable reproducibility but don't guarantee it. Therefore, the only real test if your environment is reproducible is to try and clone the repository and create the environment yourself. Even if this works, there is no guarantee that it will work on another system. Reproducibility in general is not a solved problem.*
+:::note
+These tools enable reproducibility but don't guarantee it. Therefore, the only real test if your environment is reproducible is to try and clone the repository and create the environment yourself. Even if this works, there is no guarantee that it will work on another system. Reproducibility in general is not a solved problem.*
+:::
 
-*Note: there is more to reproduciblity than just code and environments: where and how do we distribute the data needed for training/evaluation? What do we use to share the hyperparameters of the models used in the study? How do we ensure that the random 70:30 train-test split is the same every time?*
+:::note
+There is more to reproduciblity than just code and environments: where and how do we distribute the data needed for training/evaluation? What do we use to share the hyperparameters of the models used in the study? How do we ensure that the random 70:30 train-test split is the same every time?*
+:::
 
 The instructions for reproducing should always be written in the repository README along with any instructions on where and how to get the data. We will focus on git for versioning our code and conda for defining our environments as this is what you need for the IDS course.
 
@@ -31,7 +35,7 @@ The instructions for reproducing should always be written in the repository READ
 
 This is the tool you use to save your work (code), sync it to other computers, collaborate with others and help with reproducibility. Code is just a text file with a fancy file extension. Before you might have kept different versions of your code in separate folders and it was hard to remember what you added in each new revision, then if you wanted to share the code you had to send the newest folder etc. This changes today as you start using Git - a version control system that was designed to solve these issues.
 
-![Basic git](img/remotes.png)
+![Basic git](img/remotes.jpg)
 [image source](https://jlord.us/git-it/challenges/remote_control.html)
 
 ### Core terminology
@@ -175,7 +179,9 @@ conda activate my_env
 
 Python benefits from a huge ecosystem of libraries to do basically anything. Here are some that you might find useful (those that I think are directly applicable for your projects are marked with **[recommended for IDS]**), you can use anything else though as long as you achieve the goal.
 
-*Note: some of these are opinionated choices and/or things that I've encountered on my limited sample size of industry projects, I am nowhere near an expert. I've tried to stick to popular libraries (based on stackoverflow surveys, pip installs and github trends). As always you should do your own research.*
+:::note
+Some of these are opinionated choices and/or things that I've encountered on my limited sample size of industry projects, I am nowhere near an expert. I've tried to stick to popular libraries (based on stackoverflow surveys, pip installs and github trends). As always you should do your own research.*
+:::
 
 We won't go over all of these on the tutoring session, I've just listed them here so that you know they exist or what to search for if/when you are doing your own research.
 
@@ -188,6 +194,7 @@ These are libraries that come bundled with Python and you can just import withou
 - [os](https://docs.python.org/3/library/os.html) - working with directories (list and walk) and files (copy, remove)
 - [sys](https://docs.python.org/3/library/sys.html) - getting info about the host system
 - [re](https://docs.python.org/3/library/re.html) - using regular expressions (regex)
+- [random](https://docs.python.org/3/library/random.html) - generating random numbers
 - [unittest](https://docs.python.org/3/library/unittest.html) - for writing code tests. One popular external alternative: [pytest](https://docs.pytest.org/en/7.4.x/)
 - [profile](https://docs.python.org/3/library/profile.html) - which functions in my script take the longest time to execute? useful for knowing what to optimize
 - [timeit](https://docs.python.org/3/library/timeit.html) - run the same function multiple times and measure how long it takes to execute on average
@@ -204,7 +211,7 @@ You can find all available builtin modules [here](https://docs.python.org/3.12/l
 
 <details>
     <summary>
-    <a href="https://pandas.pydata.org/">pandas</a> - reading, saving, and manipulating tabular data
+    <a href="https://pandas.pydata.org/">pandas</a> - reading, saving, and manipulating tabular data <strong>[recommended for IDS]</strong>
     </summary>
 
 If you are working with tabular data, it should be in a pandas dataframe (a table). It knows how to read and save in a lot of popular formats (from csv and excel to binary formats like feather) while also exposing a simple interface for selecting data and computing some basic statistics. It also integrates well with other libraries (i.e. seaborn).
@@ -237,7 +244,7 @@ avg_sales_by_region.to_frame().to_csv('avg_sales_by_region.csv')
 
 <details>
     <summary>
-    <a href="https://matplotlib.org/3.5.3/api/_as_gen/matplotlib.pyplot.html">matplotlib</a> - drawing pretty charts
+    <a href="https://matplotlib.org/3.5.3/api/_as_gen/matplotlib.pyplot.html">matplotlib</a> - drawing pretty charts <strong>[recommended for IDS]</strong>
     </summary>
 
 This is the go-to library for drawing graphs in Python. You can draw anything from bar charts to box and scatter plots.
@@ -284,7 +291,7 @@ plt.savefig('grouped_sales_matplotlib.pdf')
 
 <details>
     <summary>
-    <a href="https://seaborn.pydata.org/">seaborn</a> - drawing pretty charts easily
+    <a href="https://seaborn.pydata.org/">seaborn</a> - drawing pretty charts easily <strong>[recommended for IDS]</strong>
     </summary>
 
 matplotlib can be a bit clunky to use. It also doesn't know how to directly work with pandas dataframes. This is why over the years, many libraries were built on top of matplotlib to offer an easier way of doing basic charts. One of these is seaborn which knows how to work with dataframes directly (you just specify the column name), as well as some sensible defaults and functionality (knows how to group by category without you having to do it manually with for loops, knows how to compute confidence intervals, includes a legend automatically when needed, etc.).
@@ -322,7 +329,7 @@ See how much less code it took?
 
 <details>
     <summary>
-    <a href="https://numpy.org/">numpy</a> - vector and matrix math
+    <a href="https://numpy.org/">numpy</a> - vector and matrix math <strong>[recommended for IDS]</strong>
     </summary>
 
 If you need to do math (matrix/vector computations) that runs quickly, you use this. Other libraries (pandas, scikit-learn, torch, etc.) all use it under the hood.
@@ -387,7 +394,7 @@ else:
 
 <details>
     <summary>
-    <a href="https://scikit-learn.org/stable/">scikit-learn</a> - shallow predictive models
+    <a href="https://scikit-learn.org/stable/">scikit-learn</a> - shallow predictive models <strong>[recommended for IDS]</strong>
     </summary>
 
 This is what you use for fitting most shallow predictive models (regression, SVM, random forests, etc.). It provides a very consistent interface to all models along with many supporting functions for hyperparameter optimization, metric computations, clustering, model selection, dimensionality reduction, data preprocessing etc.
@@ -468,7 +475,7 @@ print(f"Accuracy: {accuracy*100:.2f}%")
 
 <details>
     <summary>
-    <a href="https://tqdm.github.io/">tqdm</a> - very simple progress bars for loops
+    <a href="https://tqdm.github.io/">tqdm</a> - very simple progress bars for loops <strong>[recommended for IDS]</strong>
     </summary>
 
 A quality of life library with the purpose of providing a progress bar for any loop along with a time left estimate. To use, you just wrap your list/generator with `tqdm()`.
@@ -596,7 +603,7 @@ Now we can send mileage, horsepower and year to `http://localhost:8000/predict` 
 
 <details>
     <summary>
-    <a href="https://www.selenium.dev/">selenium</a> - automating your web browser
+    <a href="https://www.selenium.dev/">selenium</a> - automating your web browser <strong>[recommended for IDS]</strong>
     </summary>
 
 Sometimes you would like to automate actions in your web browser (go to this page, type in the username and password, log in, get some data). This is when selenium comes into play. You use it to launch a web browser and programmatically send commands to it. You can use it for getting data (web scraping), testing web applications automatically, making bots (quickly buying things before they go out of stock etc.).
@@ -743,22 +750,40 @@ This is what you use for deep learning (any kind of neural networks). There are 
 
 </details>
 
-**TODO MARK IDS REQUIREMENTS - maybe what you think needs to be used or something**
 
 ## Putting things into practice
+TODO
 
 
 ## FAQ
-### So, if we're able to get the HTML of a page with beautifulsoup, are there any scenarios where it wouldn't be enough and we would need to use selenium?
-Yes. Think about visiting an instagram profile: first only the skeleton of the page shows and then the pictures load in. beautifulsoup only sees the initial web page that is sent to you and therefore wouldn't be able to extract pictures as those are loaded in later with Javascript (remember, beautifulsoup speaks and knows only HTML and not Javascript). Furthermore, what if you want more than the first 15 pictures which are shown? You have to scroll down in order to trigger the loading of new pictures - you cannot do this with beautifulsoup.
+### What git platform should I use?
+There are many available platforms (Github, Gitlab, Bitbucket, etc.). For the majority of use cases, it doesn't matter. It starts to matter if you start using platform specific functions (Github actions or Gitlab CI/CD). I would recommend you to just use Github. It's widely used and has introduced tons of useful features making it possible to use Github as the single source of truth for everything about your project (code, wikis, plans, etc.). These resources for the tutorial sessions are published with a feature called Github pages. If you want to delve into such Github features, take a look at [this](https://github.com/features) to see what's possible and how. If you want to learn more about making git your single source of truth, read up on "gitops".
 
-### What does and doesn't belong in git
-TODO
+### How do I seed randomness and what does it mean?
+There are many cases where your code requires some random value - i.e. a random 70:30 train-test split needs random indices of rows, permutation testing requires random permutations etc. This causes issues with reproducibility as it's impossible to get the same results if each time you run your code you get different train-test splits (and therefore different models). This is the issue seeds solve. A seed is just a number you set as a starting point for the random number generator that Python uses under the hood. Take a look at the following snippet:
+```python
+import numpy as np
 
-### When to create an environment?
+# Set a seed for reproducibility
+seed_value = 42
+np.random.seed(seed_value)
+
+# Generate random numbers
+random_numbers = np.random.rand(5)  # Generate 5 random numbers between 0 and 1
+
+print("Random Numbers:")
+print(random_numbers)
+```
+Here `random_numbers` will always contain the same 5 random numbers. If you use a different seed, then it will always contain some other 5 numbers. This means that you still have random numbers, however your experiments are repeatable. Don't forget to seed all random generators (numpy uses a separate generator and seed from the python's `random` builtin module, and scikit functions take a random_state parameter to define a seed).
+
+### When to create a python (conda) environment?
+Short answer: always (1 environment per project). Each project belongs in git and should be reproducible (therefore you should have an environment per project). Furthermore, if it's a group project, then a defined environment in the git repo is a must and should be project specific as everyone will use it when working on the project. At the very least, I would recommend one environment per course - e.g. you probably won't use pandas in a computer vision course, and you won't use opencv for IDS. However you probably will use opencv for all your computer vision projects, so you can have the same environment.
 
 ### Can I use pip inside a conda environment?
+Yes, however, [it is highly discouraged](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#using-pip-in-an-environment) as it's an easy way to ruin your environment. If you still decide to do it, you have to follow one rule though: use pip after conda, as conda also tracks the packages you install with pip (these will be under the `pip` section in your exported environment.yml).
 
 ### I installed a package and the conda environment broke (some packages I previously installed don't work anymore)
+Unfortunately, this sometimes happens. There are many possible reasons why. A simple one that comes to mind is that conda can change already installed packages. Let's say you have an environment with numpy 1.26.0 installed. Then you decide to install a library that also requires numpy, but at most of version 1.19.0. Conda will automatically uninstall your numpy 1.26.0 and install 1.19.0 and then install the package you wanted to add. Even worse, sometimes you will have unresolvable conflicts (for example consider adding another packages that wants numpy exactly 1.21.0), in that case conda can and sometimes will uninstall a package you explicitly installed, ruining your environment. The solution to this is to just create a new environment (debugging the old one is not worth it).
 
-### What git platform should I use?
+### If we're able to get the HTML of a page with beautifulsoup, are there any scenarios where it wouldn't be enough and we would need to use selenium?
+Yes. Think about visiting an instagram profile: first only the skeleton of the page shows and then the pictures load in. beautifulsoup only sees the initial web page that is sent to you and therefore wouldn't be able to extract pictures as those are loaded in later with Javascript (remember, beautifulsoup speaks and knows only HTML and not Javascript). Furthermore, what if you want more than the first 15 pictures which are shown? You have to scroll down in order to trigger the loading of new pictures - you cannot do this with beautifulsoup.
