@@ -183,20 +183,19 @@ We won't go over all of these on the tutoring session, I've just listed them her
 ### Useful builtin modules
 
 These are libraries that come bundled with Python and you can just import without installing anything else:
-- argparse (when you need to create a command line interface (CLI), so you can give variable values directly from the terminal when executing the script, e.g. `python script.py --input-file my_data.csv --verbose`. For a popular external alternative see typer)
-- datetime (working with dates and times)
-- os
-- sys
-- re (use regular expressions (regex))
-- unittest (for writing code tests. One popular external alternative: pytest)
-- profile (which functions in my script take the longest time to execute? useful for knowing what to optimize)
-- timeit (run the same function multiple times and measure how long it takes to execute on average)
-- sqlite3 (when you need an SQL database that can be saved and read from a single file)
-- json (parse/save json)
-- yaml (parse/save yaml - e.g. save and read hyperparameters for a certain model)
-- tarfile (work with .tar archives)
-- gzip (work with .gz archives)
-- zipfile (work with zip archives)
+- [argparse](https://docs.python.org/3/library/argparse.html) - when you need to create a command line interface (CLI), so you can give variable values directly from the terminal when executing the script, e.g. `python script.py --input-file my_data.csv --verbose`. For a popular external alternative see [typer](https://typer.tiangolo.com/).
+- [datetime](https://docs.python.org/3/library/datetime.html) - working with dates and times
+- [os](https://docs.python.org/3/library/os.html) - working with directories (list and walk) and files (copy, remove)
+- [sys](https://docs.python.org/3/library/sys.html) - getting info about the host system
+- [re](https://docs.python.org/3/library/re.html) - using regular expressions (regex)
+- [unittest](https://docs.python.org/3/library/unittest.html) - for writing code tests. One popular external alternative: [pytest](https://docs.pytest.org/en/7.4.x/)
+- [profile](https://docs.python.org/3/library/profile.html) - which functions in my script take the longest time to execute? useful for knowing what to optimize
+- [timeit](https://docs.python.org/3/library/timeit.html) - run the same function multiple times and measure how long it takes to execute on average
+- [sqlite3](https://docs.python.org/3/library/sqlite3.html) - when you need an SQL database that can be saved and read from a single file
+- [json](https://docs.python.org/3/library/json.html) - parse/save json
+- [tarfile](https://docs.python.org/3/library/tarfile.html) - read/write .tar archives
+- [gzip](https://docs.python.org/3/library/gzip.html) - read/write .gz archives
+- [zipfile](https://docs.python.org/3/library/zipfile.html) - read/write zip archives
 
 You can find all available builtin modules [here](https://docs.python.org/3.12/library/index.html) (be careful to select the Python version you are using on the left as the modules change).
 
@@ -290,7 +289,7 @@ plt.savefig('grouped_sales_matplotlib.pdf')
 
 matplotlib can be a bit clunky to use. It also doesn't know how to directly work with pandas dataframes. This is why over the years, many libraries were built on top of matplotlib to offer an easier way of doing basic charts. One of these is seaborn which knows how to work with dataframes directly (you just specify the column name), as well as some sensible defaults and functionality (knows how to group by category without you having to do it manually with for loops, knows how to compute confidence intervals, includes a legend automatically when needed, etc.).
 
-Let's draw the same barchart as in the [matplotlib](#matplotlib---drawing-pretty-charts) section.
+Let's draw the same barchart as in the matplotlib section.
 
 ```python
 import pandas as pd
@@ -358,6 +357,36 @@ max_value = np.max(data)
 
 <details>
     <summary>
+    <a href="https://scipy.org/">scipy</a> - mainly math and stats functions that you would have to implement manually in numpy
+    </summary>
+
+scipy provides many specialized functions for hypotesis testing, probability distributions, t-tests, integration, interpolation, correlation coefficients, distance matrices etc. that you would have to implement manually in numpy.
+
+An example of computing Pearson correlation coefficient:
+```python
+import numpy as np
+from scipy import stats
+
+# Create sample data
+variable1 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+variable2 = np.array([2, 4, 5, 7, 8, 10, 11, 13, 14, 16])
+
+# Calculate the Pearson correlation coefficient
+correlation_coefficient, p_value = stats.pearsonr(variable1, variable2)
+
+print(f"Pearson Correlation Coefficient: {correlation_coefficient:.2f}")
+print(f"P-Value: {p_value:.2f}")
+
+if p_value < 0.05:
+    print("There is a statistically significant correlation.")
+else:
+    print("There is no statistically significant correlation.")
+
+```
+</details>
+
+<details>
+    <summary>
     <a href="https://scikit-learn.org/stable/">scikit-learn</a> - shallow predictive models
     </summary>
 
@@ -396,51 +425,12 @@ print(f"Accuracy: {accuracy*100:.2f}%")
 
 <details>
     <summary>
-    <a href="https://scipy.org/">scipy</a> - mainly math and stats functions that you would have to implement manually in numpy
-    </summary>
-
-scipy provides many specialized functions for hypotesis testing, probability distributions, t-tests, integration, interpolation, correlation coefficients, distance matrices etc. that you would have to implement manually in numpy.
-
-An example of computing Pearson correlation coefficient:
-```python
-import numpy as np
-from scipy import stats
-
-# Create sample data
-variable1 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-variable2 = np.array([2, 4, 5, 7, 8, 10, 11, 13, 14, 16])
-
-# Calculate the Pearson correlation coefficient
-correlation_coefficient, p_value = stats.pearsonr(variable1, variable2)
-
-print(f"Pearson Correlation Coefficient: {correlation_coefficient:.2f}")
-print(f"P-Value: {p_value:.2f}")
-
-if p_value < 0.05:
-    print("There is a statistically significant correlation.")
-else:
-    print("There is no statistically significant correlation.")
-
-```
-</details>
-
-<details>
-    <summary>
-    <a href="https://pytorch.org/">torch</a> - deep learning
-    </summary>
-
-This is what you use for deep learning (any kind of neural networks). There are many alternatives (tensorflow, JAX, etc.), however, this is what you will use in most courses that have projects in deep learning. Many additional libraries built on top of it exist (i.e. Lightning, ignite), do your own research. Examples are available [here](https://pytorch.org/tutorials/beginner/pytorch_with_examples.html).
-
-</details>
-
-<details>
-    <summary>
     <a href="https://xgboost.readthedocs.io/en/stable/#">xgboost</a> - gradient boosting models
     </summary>
 
 A library that implements gradient boosting models. **In my limited experience**, when I got a prebuilt predictive model from the industry, it was most likely xgboost or a random forest from scikit.
 
-Example on the same dataset as [scikit](#scikit-learn---shallow-predictive-models) above:
+Example on the same dataset as scikit above:
 ```python
 import xgboost as xgb
 from sklearn.datasets import load_breast_cancer
@@ -473,83 +463,6 @@ y_pred = xgb_classifier.predict(X_test)
 # Calculate the accuracy of the model
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Accuracy: {accuracy*100:.2f}%")
-```
-</details>
-
-<details>
-    <summary>
-    <a href="https://www.selenium.dev/">selenium</a> - automating your web browser
-    </summary>
-
-Sometimes you would like to automate actions in your web browser (go to this page, type in the username and password, log in, get some data). This is when selenium comes into play. You use it to launch a web browser and programmatically send commands to it. You can use it for getting data (web scraping), testing web applications automatically, making bots (quickly buying things before they go out of stock etc.).
-
-An example of navigating to a page, logging in and getting some text:
-```python
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-
-# Launch a browser
-driver = webdriver.Chrome(executable_path="/path/to/chromedriver")
-
-# Go to a webpage
-driver.get("https://example.com/login")
-
-# Find and fill in the username and password fields
-username_field = driver.find_element_by_id("username")  # Replace with the actual ID or name of the username input field
-password_field = driver.find_element_by_id("password")  # Replace with the actual ID or name of the password input field
-username_field.send_keys("your_username")
-password_field.send_keys("your_password")
-
-# Submit the login form (e.g., clicking the login button)
-login_button = driver.find_element_by_id("login-button")  # Replace with the actual ID or name of the login button
-login_button.click()
-
-# Wait for the dashboard to load (you may need to adjust the wait time based on the webpage)
-driver.implicitly_wait(10)
-
-# Extract data from the dashboard
-dashboard_data = driver.find_element_by_id("dashboard-data")  # Replace with the actual ID or name of the data element
-data_text = dashboard_data.text
-
-# Print the extracted data
-print("Dashboard Data:")
-print(data_text)
-
-# Close the browser
-driver.quit()
-```
-</details>
-
-<details>
-    <summary>
-    <a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">beautifulsoup</a> - when you need to extract data from static websites
-    </summary>
-
-beautifulsoup is a library for parsing HTML of websites (more on this in the web scraping tutorial session). If you want to acquire data from a very static page (no login, scrolling, closing pop ups required - e.g. wikipedia), it's enough to use just beautifulsoup without selenium.
-
-Example of extracting article titles from a news site:
-```python
-import requests
-from bs4 import BeautifulSoup
-
-# Send an HTTP GET request to the web page
-url = "https://example-news-site.com"
-response = requests.get(url)
-
-# Check if the request was successful (status code 200)
-if response.status_code == 200:
-    # Parse the HTML content of the page using Beautiful Soup
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    # Find and extract the titles of articles (adjust the selectors for your specific case)
-    article_titles = soup.find_all("h2", class_="article-title")  # Replace with actual HTML selectors
-
-    # Display the extracted article titles
-    for title in article_titles:
-        print(title.text.strip())  # .strip() removes leading/trailing whitespace
-
-else:
-    print("Failed to fetch the web page. Status Code:", response.status_code)
 ```
 </details>
 
@@ -677,23 +590,85 @@ def predict_price(data: CarFeatures):
     return {"predicted_price": predicted_price[0]}
 ```
 
-Now we can send mileage, horsepower and year to `http://localhost:8000/predict` (remember when we talked about using [requests](#requests---query-apis) to query APIs?) and we will get a response with the prediction!
+Now we can send mileage, horsepower and year to `http://localhost:8000/predict` (remember when we talked about using the requests module to query APIs?) and we will get a response with the prediction!
+</details>
+
+
+<details>
+    <summary>
+    <a href="https://www.selenium.dev/">selenium</a> - automating your web browser
+    </summary>
+
+Sometimes you would like to automate actions in your web browser (go to this page, type in the username and password, log in, get some data). This is when selenium comes into play. You use it to launch a web browser and programmatically send commands to it. You can use it for getting data (web scraping), testing web applications automatically, making bots (quickly buying things before they go out of stock etc.).
+
+An example of navigating to a page, logging in and getting some text:
+```python
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+# Launch a browser
+driver = webdriver.Chrome(executable_path="/path/to/chromedriver")
+
+# Go to a webpage
+driver.get("https://example.com/login")
+
+# Find and fill in the username and password fields
+username_field = driver.find_element_by_id("username")  # Replace with the actual ID or name of the username input field
+password_field = driver.find_element_by_id("password")  # Replace with the actual ID or name of the password input field
+username_field.send_keys("your_username")
+password_field.send_keys("your_password")
+
+# Submit the login form (e.g., clicking the login button)
+login_button = driver.find_element_by_id("login-button")  # Replace with the actual ID or name of the login button
+login_button.click()
+
+# Wait for the dashboard to load (you may need to adjust the wait time based on the webpage)
+driver.implicitly_wait(10)
+
+# Extract data from the dashboard
+dashboard_data = driver.find_element_by_id("dashboard-data")  # Replace with the actual ID or name of the data element
+data_text = dashboard_data.text
+
+# Print the extracted data
+print("Dashboard Data:")
+print(data_text)
+
+# Close the browser
+driver.quit()
+```
 </details>
 
 <details>
     <summary>
-    <a href="https://opencv.org/">opencv</a> - basic operations on images
+    <a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">beautifulsoup</a> - when you need to extract data from static websites
     </summary>
 
-This is what you use for working with images without neural networks for things like blurring, resizing, cropping, extracting edges, thresholding etc. Examples can be found [here](https://docs.opencv.org/4.x/examples.html).
-</details>
+beautifulsoup is a library for parsing HTML of websites (more on this in the web scraping tutorial session). If you want to acquire data from a very static page (no login, scrolling, closing pop ups required - e.g. wikipedia), it's enough to use just beautifulsoup without selenium.
 
-<details>
-    <summary>
-    <a href="https://www.nltk.org/">nltk</a> - basic operations on human language (text)
-    </summary>
+Example of extracting article titles from a news site:
+```python
+import requests
+from bs4 import BeautifulSoup
 
-For working with human language data - when you need to tokenize a string, remove stop words before feeding the input into a deep neural network. Examples can be found [here](https://www.nltk.org/howto.html)
+# Send an HTTP GET request to the web page
+url = "https://example-news-site.com"
+response = requests.get(url)
+
+# Check if the request was successful (status code 200)
+if response.status_code == 200:
+    # Parse the HTML content of the page using Beautiful Soup
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Find and extract the titles of articles (adjust the selectors for your specific case)
+    article_titles = soup.find_all("h2", class_="article-title")  # Replace with actual HTML selectors
+
+    # Display the extracted article titles
+    for title in article_titles:
+        print(title.text.strip())  # .strip() removes leading/trailing whitespace
+
+else:
+    print("Failed to fetch the web page. Status Code:", response.status_code)
+```
 </details>
 
 <details>
@@ -738,6 +713,34 @@ for person in people:
     print(f"ID: {person.id}, Name: {person.name}")
 ```
 Notice how we defined a class Person that has an id and a name and then we could create and read to and from the database through Python objects instead of having to write SQL statements (sqlalchemy writes these behind the scenes).
+</details>
+
+
+
+
+<details>
+    <summary>
+    <a href="https://opencv.org/">opencv</a> - basic operations on images
+    </summary>
+
+This is what you use for working with images without neural networks for things like blurring, resizing, cropping, extracting edges, thresholding etc. Examples can be found [here](https://docs.opencv.org/4.x/examples.html).
+</details>
+
+<details>
+    <summary>
+    <a href="https://www.nltk.org/">nltk</a> - basic operations on human language (text)
+    </summary>
+
+For working with human language data - when you need to tokenize a string, remove stop words before feeding the input into a deep neural network. Examples can be found [here](https://www.nltk.org/howto.html)
+</details>
+
+<details>
+    <summary>
+    <a href="https://pytorch.org/">torch</a> - deep learning
+    </summary>
+
+This is what you use for deep learning (any kind of neural networks). There are many alternatives (tensorflow, JAX, etc.), however, this is what you will use in most courses that have projects in deep learning. Many additional libraries built on top of it exist (i.e. Lightning, ignite), do your own research. Examples are available [here](https://pytorch.org/tutorials/beginner/pytorch_with_examples.html).
+
 </details>
 
 **TODO MARK IDS REQUIREMENTS - maybe what you think needs to be used or something**
