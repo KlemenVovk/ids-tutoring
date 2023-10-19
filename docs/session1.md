@@ -5,6 +5,11 @@ sidebar_position: 3
 
 # Git and Python for data science
 
+**Live demo:** [repository](https://github.com/KlemenVovk/ids-tutoring-s1)
+
+**Solve it yourself homework problem:** TBA after the tutoring session.
+
+
 ## Reproducibility
 
 What do we want to achieve? In layman's terms, if someone clones your repository, runs your code according to the instructions in the README, they should get the same result as you. To do this we can use several tools (non-exhaustive list):
@@ -17,7 +22,7 @@ These tools enable reproducibility but don't guarantee it. Therefore, the only r
 :::
 
 :::note
-There is more to reproduciblity than just code and environments: where and how do we distribute the data needed for training/evaluation? What do we use to share the hyperparameters of the models used in the study? How do we ensure that the random 70:30 train-test split is the same every time?*
+There is more to reproducibility than just code and environments: where and how do we distribute the data needed for training/evaluation? What do we use to share the hyperparameters of the models used in the study? How do we ensure that the random 70:30 train-test split is the same every time?*
 :::
 
 The instructions for reproducing should always be written in the repository README along with any instructions on where and how to get the data. We will focus on git for versioning our code and conda for defining our environments as this is what you need for the IDS course.
@@ -28,7 +33,7 @@ The instructions for reproducing should always be written in the repository READ
 - The environments will be created with conda and the `environment.yml` file that defines the environment will be in the git repository.
 - The README will contain ALL instructions needed to run the code.
 - We will seed all randomness in our code.
-- Later when we learn about Docker, all dockerfiles and docker compose files will be in the repository.
+- Later when we learn about Docker, all Dockerfiles and docker compose files will be in the repository.
 
 
 ## Git
@@ -42,7 +47,7 @@ This is the tool you use to save your work (code), sync it to other computers, c
 - repository - like a folder with your code. It stores everything along with the changes of every file. This is why you can look at the history of every file and who changed what and when.
 - remote - the remote server where your code is pushed (stored)
 - commit - a snapshot of the current state of your project. This allows you to save your current work.
-- branch - when you want to add a new feature or fix something, you tipically create a copy of the current state of the re1pository (copy of the main/master branch) and fix it there, once you are sure the new functionality or the fix works, you merge that into the master branch. This means that if halfway through adding a feature, the client decides to ditch it, you can just delete the branch for the feature and be back on track. **The goal is for the master branch to always have a working copy of your project. Other branches can contain work that can't be deployed yet.**
+- branch - when you want to add a new feature or fix something, you typically create a copy of the current state of the repository (copy of the main/master branch) and fix it there, once you are sure the new functionality or the fix works, you merge that into the master branch. This means that if halfway through adding a feature, the client decides to ditch it, you can just delete the branch for the feature and be back on track. **The goal is for the master branch to always have a working copy of your project. Other branches can contain work that can't be deployed yet.**
 - checkout - git terminology for switching between branches
 - .gitignore - a special text file that defines which files git won't track. For example if your data is 3GB of videos, you don't want to track those files and later push them to Github. The same goes for files containing sensitive information like API keys and passwords. So if you have a folder `data` that holds images you use to train models, than `data` should be in .gitignore
 
@@ -125,7 +130,7 @@ You probably noticed two things:
 
 To address the first point, remember that pandas is just a bunch of python files packaged in a single module (library). This means that those files can also use any other libraries that you don't need yourself. In tech speak, pandas *depends* on a lot of other libraries, one of them being numpy.
 
-Focusing on the second point, these strings define the builds. Packages like numpy are built (compiled) for a specific system architecture (the most popular being x86) for a specific OS. To differentiate between numpy 1.26.0 for Linux for x86 and numpy 1.26.0 for MacOS for M1 macbooks we use these build strings. Now, what will happen if I'm using Linux on a x86 laptop (basically all laptops, apart from the M1/M2 macbooks), export the environment and give you the `environment.yml` file to reproduce on your shiny new M2 macbook? Suddenly (some) builds might lead to packages that are not available/don't work on the M2 which means that you won't be able to recreate my environment. This is why reproduciblity is hard and isn't a solved problem.
+Focusing on the second point, these strings define the builds. Packages like numpy are built (compiled) for a specific system architecture (the most popular being x86) for a specific OS. To differentiate between numpy 1.26.0 for Linux for x86 and numpy 1.26.0 for MacOS for M1 macbooks we use these build strings. Now, what will happen if I'm using Linux on a x86 laptop (basically all laptops, apart from the M1/M2 macbooks), export the environment and give you the `environment.yml` file to reproduce on your shiny new M2 macbook? Suddenly (some) builds might lead to packages that are not available/don't work on the M2 which means that you won't be able to recreate my environment. This is why reproducibility is hard and isn't a solved problem.
 
 Why not just remove the builds then and say 'ok conda, just install any numpy 1.26.0 you can'? This is better and can be done in conda with:
 ```bash
@@ -177,14 +182,17 @@ conda activate my_env
 
 ## Python for data science
 
+### If you are just starting out...
+There are many programming practice websites available ([LeetCode](https://leetcode.com/), [CoderByte](https://coderbyte.com/), [Project Euler](https://projecteuler.net/) - don't do this, it tests more math than programming, [Advent of code](https://adventofcode.com/), etc.). I would not recommend any of these. These are sites that are meant for software engineers to prepare for technical interviews and therefore test algorithmic and data structure knowledge. I don't think you need to practice/know how to invert a binary tree, or how to implement Dijkstra's algorithm to search for the shortest path etc. This is why I would recommend you to go to [Kaggle](https://kaggle.com/), pick a dataset/challenge and work on it, see what others have done, etc. This is much closer to the work you will be doing throughout your master's studies.
+
+### The Python ecosystem
 Python benefits from a huge ecosystem of libraries to do basically anything. Here are some that you might find useful (those that I think are directly applicable for your projects are marked with **[recommended for IDS]**), you can use anything else though as long as you achieve the goal.
 
 :::note
 Some of these are opinionated choices and/or things that I've encountered on my limited sample size of industry projects, I am nowhere near an expert. I've tried to stick to popular libraries (based on stackoverflow surveys, pip installs and github trends). As always you should do your own research.*
 :::
 
-We won't go over all of these on the tutoring session, I've just listed them here so that you know they exist or what to search for if/when you are doing your own research.
-
+We won't go over all of these during the tutoring session, I've just listed them here so that you know they exist or what to search for if/when you are doing your own research.
 
 ### Useful builtin modules
 
@@ -367,7 +375,7 @@ max_value = np.max(data)
     <a href="https://scipy.org/">scipy</a> - mainly math and stats functions that you would have to implement manually in numpy
     </summary>
 
-scipy provides many specialized functions for hypotesis testing, probability distributions, t-tests, integration, interpolation, correlation coefficients, distance matrices etc. that you would have to implement manually in numpy.
+scipy provides many specialized functions for hypothesis testing, probability distributions, t-tests, integration, interpolation, correlation coefficients, distance matrices etc. that you would have to implement manually in numpy.
 
 An example of computing Pearson correlation coefficient:
 ```python
@@ -751,10 +759,6 @@ This is what you use for deep learning (any kind of neural networks). There are 
 </details>
 
 
-## Putting things into practice
-TODO
-
-
 ## FAQ
 ### What git platform should I use?
 There are many available platforms (Github, Gitlab, Bitbucket, etc.). For the majority of use cases, it doesn't matter. It starts to matter if you start using platform specific functions (Github actions or Gitlab CI/CD). I would recommend you to just use Github. It's widely used and has introduced tons of useful features making it possible to use Github as the single source of truth for everything about your project (code, wikis, plans, etc.). These resources for the tutorial sessions are published with a feature called Github pages. If you want to delve into such Github features, take a look at [this](https://github.com/features) to see what's possible and how. If you want to learn more about making git your single source of truth, read up on "gitops".
@@ -784,6 +788,20 @@ Yes, however, [it is highly discouraged](https://conda.io/projects/conda/en/late
 
 ### I installed a package and the conda environment broke (some packages I previously installed don't work anymore)
 Unfortunately, this sometimes happens. There are many possible reasons why. A simple one that comes to mind is that conda can change already installed packages. Let's say you have an environment with numpy 1.26.0 installed. Then you decide to install a library that also requires numpy, but at most of version 1.19.0. Conda will automatically uninstall your numpy 1.26.0 and install 1.19.0 and then install the package you wanted to add. Even worse, sometimes you will have unresolvable conflicts (for example consider adding another packages that wants numpy exactly 1.21.0), in that case conda can and sometimes will uninstall a package you explicitly installed, ruining your environment. The solution to this is to just create a new environment (debugging the old one is not worth it).
+
+### I'm importing a function into a notebook from a python file. However, when I change the function in the python file, and import it again in the notebook, nothing changes.
+This is a common issue, and by default, imports aren't reloaded. To solve add
+```python
+%load_ext autoreload
+%autoreload 2
+```
+at the very first cell in your notebook and run it. If this doesn't work make sure you saved your external python file, restart the kernel in your notebook and rerun everything.
+
+### I selected the correct kernel in the Python notebook, but I can't run anything.
+You are probably missing the `jupyter` package.
+```bash
+conda install -c conda-forge jupyter
+```
 
 ### If we're able to get the HTML of a page with beautifulsoup, are there any scenarios where it wouldn't be enough and we would need to use selenium?
 Yes. Think about visiting an instagram profile: first only the skeleton of the page shows and then the pictures load in. beautifulsoup only sees the initial web page that is sent to you and therefore wouldn't be able to extract pictures as those are loaded in later with Javascript (remember, beautifulsoup speaks and knows only HTML and not Javascript). Furthermore, what if you want more than the first 15 pictures which are shown? You have to scroll down in order to trigger the loading of new pictures - you cannot do this with beautifulsoup.
