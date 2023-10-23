@@ -803,5 +803,11 @@ You are probably missing the `jupyter` package.
 conda install -c conda-forge jupyter
 ```
 
+### I can't select the environment I created in VSCode (not shown in VSCode when selecting a kernel)
+This can sometimes happen, the environment is fine, it's just VSCode that's not aware of it. There are two solutions (try them in order):
+1. Try restarting VSCode and selecting the environment again.
+2. Activate the environment in the terminal `conda activate my_env` and then type `where python`. The first line is the path to the Python in your environment (something like `/home/user/conda/envs/env_name/bin/python`). Copy it. Now create a new python file (not a notebook!), open it in VSCode and in the bottom-right, click on `Select interpreter` or `Python 3.x.x`, a popup will appear with an option to `Enter interpreter path`. Select that, paste in the copied path from the terminal and hit enter. Now if you open a notebook again, you should be able to select the environment (if not restart VSCode first).
+
+
 ### If we're able to get the HTML of a page with beautifulsoup, are there any scenarios where it wouldn't be enough and we would need to use selenium?
 Yes. Think about visiting an instagram profile: first only the skeleton of the page shows and then the pictures load in. beautifulsoup only sees the initial web page that is sent to you and therefore wouldn't be able to extract pictures as those are loaded in later with Javascript (remember, beautifulsoup speaks and knows only HTML and not Javascript). Furthermore, what if you want more than the first 15 pictures which are shown? You have to scroll down in order to trigger the loading of new pictures - you cannot do this with beautifulsoup.
