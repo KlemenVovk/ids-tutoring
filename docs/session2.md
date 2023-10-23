@@ -9,6 +9,9 @@ sidebar_position: 4
 
 **Solve it yourself homework problem:** TBA after the tutoring session.
 
+**Further practice: [here](https://www.scrapethissite.com/pages)**
+
+
 ## The why, when and how
 **Why:** sometimes the dataset you want just isn't available (you've searched on [Google dataset search](https://datasetsearch.research.google.com/), [Kaggle](https://kaggle.com/) ...), or you're working with data with a time dimension and want the newest data (e.g. news, stock prices, etc.).
 
@@ -112,6 +115,7 @@ When to use certain status codes, HTTP methods, and pagination are just rules AP
 
 ### How do we scrape data through APIs?
 
+
 Scraping data through an API can be roughly described in the following steps:
 1. Find an API and its documentation. Review limitations (rate limits, accessible data) and terms of service and respect those.
 2. Get access to the API (if the API isn't free, you probably have to register to get an API key, think of it like a password you send with every request to prove to the API that you are allowed to do what you're trying to do).
@@ -128,6 +132,10 @@ Remember when we mentioned the [requests](https://pypi.org/project/requests/) li
 
 :::note
 In session 1 I emphasized that sensitive information (secrets like passwords) should not be in git and should be stored in environment variables and accessed with [python-dotenv](https://pypi.org/project/python-dotenv/). This applies to API keys too!
+:::
+
+:::tip
+Before scraping the API, always check if a library that does it for you already exists. For example, if you want to scrape Reddit through the API, there is no need to write all the API requests manually when you can just use the [PRAW library](https://praw.readthedocs.io/en/stable/) which does the heavy-lifting for you.
 :::
 
 <details>
@@ -241,34 +249,137 @@ t5-eBEIfiB,Aesop,Persuasion is often more effectual than force.,['Wisdom'],aesop
 
 </details>
 
-### Useful resources
-- JSON formatter
-- Postman or insomnia (GUI)
-- httPie or curl (CLI)
-- jq
-- pprint
-
-
-
+### Useful resources for working with APIs
+- [JSON formatter](https://jsonformatter.curiousconcept.com/) - make JSON human readable.
+- [HTTPie Desktop/Web](https://httpie.io/desktop) or [Postman](https://www.postman.com/) - GUI tools for manually calling/testing APIs.
+- [HTTPie CLI](https://httpie.io/cli) or [curl](https://curl.se/) (you already have this installed probably, but HTTPie is more better for APIs) - CLI tools for manually calling/testing APIs.
+- [jq](https://jqlang.github.io/jq/download/) - json formatter from the terminal.
+- [pprint](https://docs.python.org/3/library/pprint.html) - builtin Python module for pretty printing stuff (formats JSON and basically all objects in Python).
 
 ## Web scraping of static websites
 
+As seen above in the Wikipedia example, some sites are static enough to the point where we don't need to execute/load any Javascript as all the data is already in the HTML itself. In this case, we can use tools that only speak HTML, one such tool is the [beautifulsoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) library for Python. Before we can scrape it, we need to get familiar with how it's actually built.
+
+### Structure of an HTML file
+
+The HTML file a browser downloads is a tree of elements. These elements can quite literally be anything and can be nested in one another. Let's take a look at a very basic HTML file:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Web Page</title>
+    <meta name="description" content="A basic web page for web scraping illustration.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Welcome to Web Scraping 101</h1>
+    <p>This is a basic web page that we'll use to illustrate web scraping.</p>
+    <ul>
+        <li><a href="https://example.com">Visit Example.com</a></li>
+        <li><a href="https://samplewebsite.com">Visit SampleWebsite.com</a></li>
+    </ul>
+    <h2>Sample Data</h2>
+    <div id="data-container">
+        <p class="data">This is the first data point.</p>
+        <p class="data">And this is the second data point.</p>
+    </div>
+    <img src="https://via.placeholder.com/150" alt="Sample Image">
+    <button id="sample-button">Click Me</button>
+</body>
+</html>
+```
+
+The HTML is always in two main parts: the visible part (anything inside `<body>` tags) - what the user sees directly, and the invisible part (anything inside `<head>` tags) - mostly metadata, also linked files (remember when we mentioned that a browser downloads the basic HTML and in that HTML there are links to other files such as fonts, CSS files, Javascript files, etc.?).
+
+There are a lot of HTML elements for anything from headings (`<h1>` to `<h6>`, progressively smaller headings), links (`<a>`, short for anchor), paragraphs (`<p>`), buttons (`<button>`) to form elements (checkboxes, radio buttons, dropdowns, search fields) and images. You can view a more exhaustive list [here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element). You can learn these as you go because you aren't required to write any HTML yourself. One more frequent tag you'll see is `div` (short for division, section), which does nothing on its own and is used to group elements together - i.e. we can put a bunch of links `<a>` into a `<div>` and change the background color to indicate importance or outline them with a black border to create a box around them...
+
+One more thing you should notice is that elements can have (multiple) attributes (a link element needs to have a destination where the user will be redirected, this destination is specified in a `href` attribute, i.e. `<a href="https://example.com">`).
+
+:::tip
+#### As someone interested in web scraping only, I want you to pay attention only to the following things inside HTML:
+- the tags of the elements (`<a>`, `<p>`, `<button>`, `<h1>`)
+- how the elements are nested (which element is a child/sibling/parent of which element)
+- the `id` attribute on any element
+- the `class` attribute on any element
+
+**Your goal when web scraping with HTML will always boil down to selecting the right element and getting some property of it (the text inside it, the destination if it's a link, etc.).**
+:::
+
+### Selecting the right element to scrape
+CSS selectors **TODO**
+
+<details>
+    <summary>
+    Let's do a simple example of scraping a static website
+    </summary>
+
+**TODO**
+
+</details>
 
 ## Web scraping with browser automation
-
+The goal here is to make the element you want information from, visible on the screen.
 **TODO**
 
 
-## Bonus: RSS
+## Bonus: RSS feedscraping
 
-**TODO**
+There are other channels that websites use to provide new information. One such protocol is [RSS](https://en.wikipedia.org/wiki/RSS) (Really Simple Syndication), you probably know it by the following icon <img src="rss.png" alt="RSS Feed" width="20" height="20" />.
+
+In short, it's a live feed of newly added things (usually articles). It can be very useful, as it's not as error prone as HTML scraping, a lot of sites (news, blogs) have it enabled and available by default. The feed is defined by a single file usually at `https://site.com/feed` or `https://site.com/rss`, or you can look for the RSS icon somewhere on the page.
+
+In Python you can use the [feedparser library](https://pypi.org/project/feedparser/) to scrape RSS feeds. There are some limitations compared to API or HTML scraping, mainly, you can't really select/filter data, you just get access to a predetermined number of most recent elements (news articles, blog posts).
+
+<details>
+    <summary>
+    Let's do a quick example of scraping an RSS feed
+    </summary>
+
+```python
+import feedparser # conda install -c conda-forge feedparser
+import pandas as pd
+from pprint import pprint
+
+FEED_URL = "https://www.24ur.com/rss"
+
+feed = feedparser.parse(FEED_URL)
+df = pd.DataFrame(feed["entries"])
+df = df[["published", "title", "link", "summary"]]
+df.to_csv("24ur.csv", index=False)
+```
+
+Output csv:
+
+```csv
+published,title,link,summary
+"Mon, 23 Oct 2023 13:56:37 +0200",Sum kartelnega dogovarjanja z blagoslovom Darsa?,https://www.24ur.com/novice/dejstva/sum-kartelnega-dogovarjanja-z-blagoslovom-darsa.html,"<img alt=""www.24ur.com"" src=""https://images.24ur.com/media/images/213xX/Oct2023/5a96ca24c5d93754c1df_63136699.jpg?v=7069&amp;fop=fp:0.33:0.42"" /> V luči našega razkritja, podkrepljenega s posnetkom v rubriki Fokus, da je davčni svetovalec Rok Snežič od skesanca za posel na Darsu zahteval podkupnino in jo tudi dobil, smo pod drobnogled vzeli aktualni javni razpis za avtovleke tovornih vozil. Očitno gre za nevralgično točko Darsa, saj se v omenjeni razpis vpleta sam predsednik uprave Darsa Valentin Hajdinjak. Razkrivamo pa tudi sum kartelnega dogovarjanja. Zakaj je razpis za avtovleke torej tako pomemben? Kaj se dogaja v ozadju?"
+"Mon, 23 Oct 2023 13:16:00 +0200",Policija po razkritju domnevnih nepravilnosti na Darsu obiskala POP TV,https://www.24ur.com/novice/slovenija/policija-po-razkritju-domnevnih-nepravilnosti-na-darsu-obiskala-pop-tv.html,"<img alt=""www.24ur.com"" src=""https://images.24ur.com/media/images/213xX/Apr2019/947019e0a8_62233080.jpg?v=7bcb&amp;fop=fp:0.34:0.30"" /> Po razkritju domnevnega podkupovanja, izsiljevanja, suma korupcije, favoriziranja in spornih javnih razpisov, vse v povezavi z največjo državno družbo Dars, se je Policija nemudoma odzvala ter na naši medijski hiši zaprosila za predajo dokumentacije in posnetkov. Slovenski državni holding pa je na sestanek pozval celotni nadzorni svet in upravo družbe za avtoceste. Ob tem zagotavljajo, da namerava SDH izkoristiti vsa razpoložljiva sredstva, da se morebitna koruptivna dejanja v bodoče preprečijo, morebiti že izvedena pa raziščejo in ustrezno kaznujejo. Da bodo zadevo prednostno obravnavali, pa zagotavljajo tudi na Komisiji za preprečevanje korupcije."
+"Mon, 23 Oct 2023 20:06:00 +0200","Paketi prehranske pomoči kopnijo, donacij je vse manj",https://www.24ur.com/novice/slovenija/Paketi-prehranske-pomoci-kopnijo-donacij-je-vse-manj.html,"<img alt=""www.24ur.com"" src=""https://images.24ur.com/media/images/213xX/Mar2020/1e5b497bbc_62401233.jpg?v=77f2&amp;fop=fp:0.36:0.53"" /> Na Zvezi prijateljev mladine Moste - Polje so čedalje bolj zaskrbljeni. Na njihovo pomoč trenutno računa več kot 300 družin, veliko se jih mora vsak mesec odločati med nakupom hrane in plačilom položnic. Kako jim bodo pomagali brez pomoči donatorjev, ne vedo, saj je zalog hrane le še za približno dva tedna. Zato pozivajo k donacijam, državo pa k ukrepanju."
+"Mon, 23 Oct 2023 18:30:44 +0200",'Janša načrtno povzroča kaos in izredne razmere',https://www.24ur.com/popkast/jansa-nacrtno-povzroca-kaos-in-izredne-razmere.html,"<img alt=""www.24ur.com"" src=""https://images.24ur.com/media/images/213xX/Oct2023/7b24b67712ee268a869b_63136848.jpg?v=4f6c&amp;fop=fp:0.31:0.12"" /> Največja opozicijska stranka SDS je v javnomnenjski podpori prvič občutneje odskočila od Gibanja Svoboda. Raziskava Inštituta Mediana kaže tudi, da vladna politika že drugi mesec zapored izgublja javno podporo. Je premier Robert Golob ministrico za kmetijstvo Ireno Šinko in ministra za okolje Uroša Brežana 'odstavil' prepozno? Zakaj prvak SDS-a poziva ljudi, naj se legalno oborožijo? Gosta tokratnega Popkasta sta bila odgovorni urednik Mladine Grega Repovž in odgovorni urednik portala Necenzurirano Primož Cirman."
+...
+```
+
+</details>
+
+:::note
+A more modern alternative to RSS feeds are [Atom](https://en.wikipedia.org/wiki/Atom_(web_standard)) feeds, which can also be scraped with feedparser.
+:::
 
 ## General tips
 
-**TODO**
+- When doing browser automation, keep the browser window size constant, as if the site is responsive (any site that adjusts to mobile screens), it can change a lot when the layout changes from full-width desktop, to half-width or even mobile causing your selectors to stop working. (e.g. the search bar might be hidden behind a hamburger menu on mobile, so you can't just select it and enter text, but have to open the menu first).
+- Sites have robots.txt which is usually at `https://site.com/robots.txt` which defines who can scrape what (e.g. many sites allow Google to scrape them, so that they can be in the search results, but have no reason to allow you to scrape them). This isn't particularly enforced and is more of a "please don't do this and that", but you should still try to respect this. e.g. [Wikipedia robots.txt](https://en.wikipedia.org/robots.txt)
+- Always try to be nice to the websites you are scraping, don't swarm them with requests. You are also very likely to trigger bot countermeasures and will be rate limited making your scraping take even longer.
+- Try to only send requests exactly for what you need. For example, if you are scraping news articles about a specific topic, it makes sense to use the search functionality of the site (if there is one), to narrow down your selection. Furthermore, the headlines of the topics will probably be visible in a list so you can scrape those and then decided for each topic if you want to send a request to open the article or not.
+- Sometimes sites have poor search functionality. You can use the power of Google to your advantage. For example, if you want to scrape Reddit for cat pictures you can search `site:reddit.com cat pictures` to make Google search only on Reddit. There are [many such refinements you can do to your Google searches](https://support.google.com/websearch/answer/2466433?hl=en).
+- Browser automation can be used for more than just scraping. Think of automated testing of web applications.
+- It's normal for your scraper to break (especially if you are doing browser automation) as you are at the mercy of the developers of the website. If they change the structure, your scraper breaks. This is why I recommend saving the data ASAP and ditching the scraper.
+- When you are done writing your scraper with Selenium, try to switch to headless mode - this is also useful if you are running a scraper on a server with no GUI at all.
 
 ## FAQ
+- Selenium not finding the driver
 
 **TODO**
-
-**Further practice: [here](https://www.scrapethissite.com/pages)**
