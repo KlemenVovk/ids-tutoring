@@ -20,12 +20,12 @@ sidebar_position: 4
 **How:** I propose a division of web scraping into 3 types:
 1. Web scraping using APIs - here we request data from APIs that were exposed by the site itself.
 2. Web scraping static websites - here we work with only HTML (no need for browser automation, just a simple request).
-3. Web scraping with browser automation - here we automate a web browser to navigate the web page and copy the data just as we would manually.
+3. Web scraping with browser automation - here we automate a web browser to navigate the web page, trigger loading new data and saving it just as we would manually.
 
 :::tip
-If you have to do web scraping, always prefer 1. over 2. over 3. (the purpose of an API is to expose data - this is exactly what you want). However, it may not always be possible (the API might not be publicly available, it might be paid, it might not expose all the data you want, etc.). Here we say "I want this data with these properties in this format." and the API just gives it to us.
+If you have to do web scraping, always prefer 1. over 2. over 3. (the purpose of an API is to expose data - this is exactly what you want). However, it may not always be possible (the API might not be publicly available, it might be paid, it might not expose all the data you want, etc.). In this approach we say "I want this data with these properties in this format." and the API just gives it to us.
 
-The second option is the easiest when an API is not available and the site loads all of the content you want in the initial HTML (no need to scroll to trigger additional image/comment loading etc.). Here we say "go to this URL and get the whole page that shows up.". This way we get everything that is initially displayed, however that might not be everything we want (e.g. you may need to scroll down to trigger comments to load, or you may need to login first etc.)
+The second option is the easiest when an API is not available and the site loads all of the content you want in the initial HTML (no need to scroll to trigger additional image/comment loading etc.). In this we say "go to this URL and get the whole page that shows up.". This way we get everything that is initially displayed, however that might not be everything we want (e.g. you may need to scroll down to trigger comments to load, or you may need to login first etc.)
 
 The third option is when all else fails and can work on any site you can view, however it is also way more error prone and can be clunky to execute, here we tell the browser "go to this site, enter the username and password, click login, wait 2s, scroll down to trigger loading of images/comments, get the comments etc.
 :::
@@ -311,13 +311,15 @@ One more thing you should notice is that elements can have (multiple) attributes
 ### Selecting the right element to scrape
 CSS selectors **TODO**
 
+### The bread and butter for site inspection: Chrome devtools
+**TODO**
+
 <details>
     <summary>
     Let's do a simple example of scraping a static website
     </summary>
 
 **TODO**
-
 </details>
 
 ## Web scraping with browser automation
@@ -325,11 +327,11 @@ The goal here is to make the element you want information from, visible on the s
 **TODO**
 
 
-## Bonus: RSS feedscraping
+## Bonus: RSS feed scraping
 
 There are other channels that websites use to provide new information. One such protocol is [RSS](https://en.wikipedia.org/wiki/RSS) (Really Simple Syndication), you probably know it by the following icon <img src="rss.png" alt="RSS Feed" width="20" height="20" />.
 
-In short, it's a live feed of newly added things (usually articles). It can be very useful, as it's not as error prone as HTML scraping, a lot of sites (news, blogs) have it enabled and available by default. The feed is defined by a single file usually at `https://site.com/feed` or `https://site.com/rss`, or you can look for the RSS icon somewhere on the page.
+In short, it's a live feed of newly added things (usually articles). It can be very useful, as it's not as error prone as HTML scraping, a lot of sites (news, blogs) have it enabled and available by default. The feed is defined by a single file usually at `https://site.com/feed` or `https://site.com/rss` (i.e. [https://www.24ur.com/rss](https://www.24ur.com/rss)), or you can look for the RSS icon somewhere on the page.
 
 In Python you can use the [feedparser library](https://pypi.org/project/feedparser/) to scrape RSS feeds. There are some limitations compared to API or HTML scraping, mainly, you can't really select/filter data, you just get access to a predetermined number of most recent elements (news articles, blog posts).
 
@@ -362,6 +364,10 @@ published,title,link,summary
 ...
 ```
 
+:::tip
+An example use for RSS could also be to get links to scrape - if you're scraping a news site for new articles constantly, it would be very beneficial to know which articles are new and which you've already scraped. Since each article in the RSS feed comes with a link pointing to it, it's a great, robust way to get the links you want to scrape without having to resort to the error prone HTML scraping or browser automation.
+:::
+
 </details>
 
 :::note
@@ -381,5 +387,4 @@ A more modern alternative to RSS feeds are [Atom](https://en.wikipedia.org/wiki/
 
 ## FAQ
 - Selenium not finding the driver
-
 **TODO**
