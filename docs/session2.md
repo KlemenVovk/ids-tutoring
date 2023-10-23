@@ -14,12 +14,17 @@ sidebar_position: 4
 
 **When:** whenever you can't find a csv/json/other data file, but know where the data is online.
 
-**How:** I propose a division of web scraping into 2 types:
+**How:** I propose a division of web scraping into 3 types:
 1. Web scraping using APIs - here we request data from APIs that were exposed by the site itself.
-2. Web scraping with browser automation - here we automate a web browser to navigate the web page and copy the data just as we would manually.
+2. Web scraping static websites - here we work with only HTML (no need for browser automation, just a simple request).
+3. Web scraping with browser automation - here we automate a web browser to navigate the web page and copy the data just as we would manually.
 
 :::tip
-If you have to do web scraping, always prefer 1. over 2. (the purpose of an API is to expose data - this is exactly what you want). However, it may not always be possible (the API might not be publicly available, it might be paid, it might not expose all the data you want, etc.). The second option is way more flexible and can work on any site you can view, however it is also way more error prone and can be clunky to execute.
+If you have to do web scraping, always prefer 1. over 2. over 3. (the purpose of an API is to expose data - this is exactly what you want). However, it may not always be possible (the API might not be publicly available, it might be paid, it might not expose all the data you want, etc.). Here we say "I want this data with these properties in this format." and the API just gives it to us.
+
+The second option is the easiest when an API is not available and the site loads all of the content you want in the initial HTML (no need to scroll to trigger additional image/comment loading etc.). Here we say "go to this URL and get the whole page that shows up.". This way we get everything that is initially displayed, however that might not be everything we want (e.g. you may need to scroll down to trigger comments to load, or you may need to login first etc.)
+
+The third option is when all else fails and can work on any site you can view, however it is also way more error prone and can be clunky to execute, here we tell the browser "go to this site, enter the username and password, click login, wait 2s, scroll down to trigger loading of images/comments, get the comments etc.
 :::
 
 :::note
