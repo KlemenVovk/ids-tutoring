@@ -5,7 +5,7 @@ sidebar_position: 4
 
 # Web scraping
 
-**Live demo:** TODO
+**Live demo:** [repository](https://github.com/KlemenVovk/ids-tutoring-s2)
 
 **Solve it yourself homework problem:** TBA after the tutoring session.
 
@@ -60,7 +60,7 @@ If we compare this to a Wikipedia page with disabled Javascript, we can see that
 ![wikipedia skeleton](img/wikipedia_skeleton.png)
 
 :::tip
-To check if what parts of the website are static/dynamic you can disable execution of Javascript: open devtools in Chrome (F12), then check `Disable cache`, press `Ctrl + Shift + P`, search for `Disable Javascript` and execute that, then reload the page and see what's displayed.
+To check if what parts of the website are static/dynamic you can disable execution of Javascript: open devtools in Chrome (F12), then check `Disable cache` (network tab), press `Ctrl + Shift + P`, search for `Disable Javascript` and execute that, then reload the page and see what's displayed.
 :::
 
 ### How does a webpage load?
@@ -309,22 +309,216 @@ One more thing you should notice is that elements can have (multiple) attributes
 :::
 
 ### Selecting the right element to scrape
-CSS selectors **TODO**
+Before we can get data from the element we are interested in, we have to select it. For this we use [CSS selectors](https://www.w3schools.com/cssref/css_selectors.php). There are 5 main ways of selecting elements in HTML, and you use them depending on your needs:
+
+1. Selecting by tag names ("give me all `<img>` elements") - this is useful when you want all elements of a certain type no matter at what level they are in the HTML tree. To use them, just specify the tag name i.e. `a`.
+2. Selecting by class names ("give me all elements that have an attribute `class=something`) - classes are usually used to style multiple elements in the same way, e.g. do you see how the tips on this page always have a green background? If you take a look you will see that these tips are `div` elements with text inside them. So if we wanted to select all elements with tips, we couldn't just say `div`, because there are many other divs that aren't for tips. However, all tips have class `alert--success`, so we can select them with `.alert--success` (notice the dot!).
+3. Selecting by ID ("give me this specific element) - this is useful when we want exactly one, unique element, e.g. there is usually just one login button with an `id=loginButton` attribute (or something similar), so we can select it (to press it) with `#loginButton` (notice the hashtag!).
+4. Selecting by descendants ("give me all `<a>` elements inside `<footer>`") - this is useful when we can't really comfortably select by tag/class/id, maybe there's a `<footer>` at the bottom of a page that has contact links (`<a>`), we can select those links by `footer > p`. You can also select siblings (check the CSS selectors link above).
+5. Selecting by XPath - a powerful system of selectors that can replace all of the above. It treats HTML as an XML tree (which is exactly what it is). You can read more about it [here](https://www.scrapingbee.com/blog/practical-xpath-for-web-scraping/). Using it is purely personal preference, we won't delve into it here, I will just show you how easy it is to automatically generate XPath selectors with Chrome devtools.
+
+:::note
+Usually there are multiple ways you can select an element and they all work. Stick to whatever feels natural to you.
+:::
+
+:::tip
+You can use the starting point (root element) to your advantage. The default root element is `<html>` and all selectors are executed on whatever is inside it (which is everything). However, you can select a certain `<p>` as your root element and then run selectors against that. So if you want all links from a particular paragraph, you could first select that paragraph `<p>` and then use it as a root element to select all `<a>` elements inside it.
+
+In general there is no need for you to get the element you want in one line of code. It makes perfect sense that if you e.g. you are scraping a news site and get an article, to first only select the `<div>` with all contents of the article and use that as the root for further scraping (this way you get rid of the navigation bar, buttons, headers, footers, etc.).
+:::
+
+
 
 ### The bread and butter for site inspection: Chrome devtools
-**TODO**
+To find out what elements there are so that you know what selectors to write, you use the devtools of your preferred browser. These are opened by pressing `F12` on any site you want to inspect.
+
+![devtools](img/devtools.png)
+
+I would like to highlight the following elements (annotated with numbers on the image):
+1. Press this and then select anything on the page and it will open you that element in the elements window below.
+2. Elements window - here you can see the HTML that you will be scraping. You can right click any element and select `Copy` and then `Selector` or `XPath` to get a selector specific to that element.
+3. Sources tab - here you can check the downloaded items (images, scripts, ...)
+4. Network tab - here you can see all the requests that were made (this is also great if you are trying to reverse engineer an API).
+
+
+:::note
+Devtools are used for much more than just inspection, i.e. you can see how the website looks on mobile phones, you can check if the functionality works offline (if you have a calculator on the site, it makes sense to perform this computations locally, so internet connection isn't really needed beyond the first load), you can throttle your internet speed to see how the site performs on slow connections, you can take full page screenshots (`Ctrl + Shift + P`, search for `screenshot`) etc.
+:::
 
 <details>
     <summary>
     Let's do a simple example of scraping a static website
     </summary>
 
-**TODO**
+Our goal is to scrape all programming languages from [this Wikipedia page](https://en.wikipedia.org/wiki/List_of_programming_languages).
+
+Let's inspect the page with Devtools:
+
+![wikipedia soup scraping](img/wikisoupscrape.png)
+
+We notice two things:
+1. All elements that we want (programming languages) are links `<a>`
+2. These links are always in `div` elements that have class `div-col`
+
+This is enough to select them and scrape them!
+
+```python
+import requests
+from bs4 import BeautifulSoup # conda install -c conda-forge beautifulsoup4
+import pandas as pd
+
+# URL of the Wikipedia page to scrape
+BASE_URL = 'https://en.wikipedia.org'
+url = BASE_URL + '/wiki/List_of_programming_languages'
+
+# Send a GET request to the URL
+response = requests.get(url)
+
+# Parse the HTML content of the page using BeautifulSoup
+soup = BeautifulSoup(response.content, 'html.parser')
+
+# Find the main content of the page (class = div-col)
+content = soup.find_all(class_='div-col') # note: class_ is used instead of class (class is a reserved keyword in Python)
+
+# scrape the links from all divs with class=div-col
+results = []
+for div in content:
+    links = div.find_all('a')
+    for link in links:
+        # Get the link text (what you actually see), and the link itself.
+        results.append([link.text, BASE_URL + link.get('href')])
+
+# convert the results list into a Pandas DataFrame
+df = pd.DataFrame(results, columns=['language', 'link'])
+df.to_csv('languages.csv', index=False)
+```
+
+Output csv:
+```csv
+language,link
+A.NET (A#/A sharp),https://en.wikipedia.org/wiki/A_Sharp_(.NET)
+A-0 System,https://en.wikipedia.org/wiki/A-0_System
+A+ (A plus),https://en.wikipedia.org/wiki/A%2B_(programming_language)
+ABAP,https://en.wikipedia.org/wiki/ABAP
+ABC,https://en.wikipedia.org/wiki/ABC_(programming_language)
+...
+```
+
 </details>
 
 ## Web scraping with browser automation
-The goal here is to make the element you want information from, visible on the screen.
-**TODO**
+When we were using only beautifulsoup, you may have noticed, we couldn't interact with the page (we can't really click any buttons or scroll), we were dependent on everything we wanted already being present in the HTML on page load (this is why I chose Wikipedia :)).
+
+This is where [Selenium](https://www.selenium.dev/) comes to the rescue. The **only** thing Selenium does is automate the web browser, so we can navigate to the page, scroll, login and click all we want. Once we have everything we want loaded we get the HTML and from there we can proceed in the exact same way as we did when we were using beautifulsoup (we can even pass the HTML to beautifulsoup, and use that).
+
+
+### Prerequisites
+Selenium needs a web browser (duh), and a web browser driver. The driver is basically a wrapper around a web browser that allows automation (so Selenium can just call something like `driver.click()` and then the driver will take care of telling the browser to click). This makes sense, because it would be a nightmare if the folks at Selenium had to develop the automation tools for each browser themselves. 
+
+On some systems things just work out of the box. You can check by executing the following script:
+```python
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+
+service = Service()
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome(service=service, options=options)
+
+# Navigate to the webpage you want to scrape
+driver.get("https://www.google.com")
+
+# Close the webdriver
+driver.quit()
+```
+
+If everything works, a browser window should open, navigate to Google and close.
+
+:::note
+These webdrivers are a common source of issues (sometimes Selenium doesn't find it, sometimes the version of the driver or the browser is wrong etc.). If you run into any issues where the above script doesn't run, get in touch and I will try my best to help you solve it.
+
+You can try troubleshooting yourself by steps outlined [here](https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location/).
+:::
+
+<details>
+    <summary>
+    Let's do a simple example of scraping with browser automation
+    </summary>
+
+Our goal is to scrape the comments from [this RTVSLO article](https://www.rtvslo.si/slovenija/premier-naj-bi-predsednico-dz-ja-pozval-k-odstopu-ocita-se-ji-da-prepogosto-ravna-po-svoje/685890).
+
+Let's inspect the page with Devtools:
+
+![rtvslo](img/rtvsloscrape.png)
+
+We notice the following:
+1. The comments are on the bottom of the page
+2. The comments are not loaded by default and have to be loaded in by clicking `Prikaži komentarje` which is a `<a>` element with class `link-show-comments` 
+
+Let's load the comments and inspect again:
+![rtvslo comments](img/rtvslocomments.png)
+
+We notice the following:
+1. Each comment is in a `<div>` element with the class `comment`
+2. The text is inside that `<div>` in one `<p>` element
+
+So our plan is to load the page, scroll to the bottom, click `Prikaži komentarje`, get all divs that have class `comment` and get the `<p>` element to copy its text.
+
+```python
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+import time
+import pandas as pd
+
+service = Service()
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome(service=service, options=options)
+
+URL = "https://www.rtvslo.si/slovenija/premier-naj-bi-predsednico-dz-ja-pozval-k-odstopu-ocita-se-ji-da-prepogosto-ravna-po-svoje/685890"
+driver.get(URL)
+
+# Scroll to the bottom of the page
+driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+# click on "Prikaži komentarje"
+driver.find_element(By.CLASS_NAME, "link-show-comments").click()
+
+# wait for 3 seconds for the comments to load
+time.sleep(3)
+
+# find all divs with class "comment"
+results = []
+comments = driver.find_elements(By.CLASS_NAME, "comment")
+for comment in comments:
+    # Get the main <p> element and its text
+    p = comment.find_element(By.TAG_NAME, "p")
+    # get text and make it all one line
+    text = p.text.replace("\n", " ").strip()
+    results.append(text)
+
+# Save the results to a CSV file
+df = pd.DataFrame({"comment": results, "article_url": URL})
+df.to_csv("comments.csv", index=False)
+
+# Close the webdriver
+driver.quit()
+```
+
+Output csv:
+```csv
+comment,article_url
+"""Premier Golob naj bi predsednico DZ-ja pozval k odstopu""  Lepo prosim da svobodno odstopite vsi skupaj! Vi se ukvarjate sami s sabo, namesto z aktualnimi težavami v državi. Sploh ne nastopate enotno. Tole je pa kaplja čez rob, kot otroci v vrtcu, kdo bo bolj užaljen.  Če bi trenutno obstajala kakšna dobra alternativa, bi bila rešitev predčasne volitve.",https://www.rtvslo.si/slovenija/premier-naj-bi-predsednico-dz-ja-pozval-k-odstopu-ocita-se-ji-da-prepogosto-ravna-po-svoje/685890
+"Kakšen je potem sploh smisel nekih kvot pa ne ven česa vse, če itak vsi morajo glasovati po nareku nekoga? Potem na te funkcije postavite pse in mačke, bo več koristi...",https://www.rtvslo.si/slovenija/premier-naj-bi-predsednico-dz-ja-pozval-k-odstopu-ocita-se-ji-da-prepogosto-ravna-po-svoje/685890
+Podira se. Maja bomo na volitvah.,https://www.rtvslo.si/slovenija/premier-naj-bi-predsednico-dz-ja-pozval-k-odstopu-ocita-se-ji-da-prepogosto-ravna-po-svoje/685890
+Ma dobro. A živimo ba Kitajskem? Odstopi naj Golob.,https://www.rtvslo.si/slovenija/premier-naj-bi-predsednico-dz-ja-pozval-k-odstopu-ocita-se-ji-da-prepogosto-ravna-po-svoje/685890
+...
+```
+
+:::note
+Notice how here, we didn't use the `requests` library anymore. We are using a proper browser to do the requests (and followup requests) for us.
+:::
+
+</details>
 
 
 ## Bonus: RSS feed scraping
@@ -376,15 +570,29 @@ A more modern alternative to RSS feeds are [Atom](https://en.wikipedia.org/wiki/
 
 ## General tips
 
+- When doing browser automation, it's useful to throw in some `time.sleep(SECONDS)` to wait for the page/elements to load, or just to do things slower, so you can see what's happening when debugging.
 - When doing browser automation, keep the browser window size constant, as if the site is responsive (any site that adjusts to mobile screens), it can change a lot when the layout changes from full-width desktop, to half-width or even mobile causing your selectors to stop working. (e.g. the search bar might be hidden behind a hamburger menu on mobile, so you can't just select it and enter text, but have to open the menu first).
-- Sites have robots.txt which is usually at `https://site.com/robots.txt` which defines who can scrape what (e.g. many sites allow Google to scrape them, so that they can be in the search results, but have no reason to allow you to scrape them). This isn't particularly enforced and is more of a "please don't do this and that", but you should still try to respect this. e.g. [Wikipedia robots.txt](https://en.wikipedia.org/robots.txt)
-- Always try to be nice to the websites you are scraping, don't swarm them with requests. You are also very likely to trigger bot countermeasures and will be rate limited making your scraping take even longer.
-- Try to only send requests exactly for what you need. For example, if you are scraping news articles about a specific topic, it makes sense to use the search functionality of the site (if there is one), to narrow down your selection. Furthermore, the headlines of the topics will probably be visible in a list so you can scrape those and then decided for each topic if you want to send a request to open the article or not.
-- Sometimes sites have poor search functionality. You can use the power of Google to your advantage. For example, if you want to scrape Reddit for cat pictures you can search `site:reddit.com cat pictures` to make Google search only on Reddit. There are [many such refinements you can do to your Google searches](https://support.google.com/websearch/answer/2466433?hl=en).
 - Browser automation can be used for more than just scraping. Think of automated testing of web applications.
+- When you are done writing your scraper with Selenium, try to switch to [headless mode](https://www.selenium.dev/blog/2023/headless-is-going-away/) (launches a browser, but behind the scenes, you don't see a window) - this is also useful if you are running a scraper on a server with no GUI at all.
 - It's normal for your scraper to break (especially if you are doing browser automation) as you are at the mercy of the developers of the website. If they change the structure, your scraper breaks. This is why I recommend saving the data ASAP and ditching the scraper.
-- When you are done writing your scraper with Selenium, try to switch to headless mode - this is also useful if you are running a scraper on a server with no GUI at all.
+- Try to only send requests exactly for what you need. For example, if you are scraping news articles about a specific topic, it makes sense to use the search functionality of the site (if there is one), to narrow down your selection. Furthermore, the headlines of the topics will probably be visible in a list so you can scrape those and then decided for each topic if you want to send a request to open the article or not.
+- Always try to be nice to the websites you are scraping, don't swarm them with requests. You are also very likely to trigger bot countermeasures and will be rate limited making your scraping take even longer.
+- Sites have robots.txt which is usually at `https://site.com/robots.txt` which defines who can scrape what (e.g. many sites allow Google to scrape them, so that they can be in the search results, but have no reason to allow you to scrape them). This isn't particularly enforced and is more of a "please don't do this and that", but you should still try to respect this. e.g. [Wikipedia robots.txt](https://en.wikipedia.org/robots.txt)
+- Sometimes sites have poor search functionality. You can use the power of Google to your advantage. For example, if you want to scrape Reddit for cat pictures you can search `site:reddit.com cat pictures` to make Google search only on Reddit. There are [many such refinements you can do to your Google searches](https://support.google.com/websearch/answer/2466433?hl=en).
+- Make sure that `Disable cache` is checked in Devtools (network tab), so that your browser and the instance of the browser that Selenium uses see the same thing (there's no caching going on).
 
 ## FAQ
-- Selenium not finding the driver
-**TODO**
+### How do I scroll to the bottom with Selenium?
+For this you execute a Javascript script. You can do this from Python with:
+```python
+driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+```
+
+### I can't click or copy something from the page with Selenium, but I know the selectors are correct
+There are many possible reasons why, here's some tips:
+- Try adding some `time.sleep(1)` statements to give the browser time to load everything properly
+- Selenium can only click on something that is visible in the browser window. So if a button you are trying to click is on the bottom of the page and you can't see it without scrolling down, you need to scroll down before you can select it.
+
+
+### When I reload the webpage in my browser, changes I made persist (some buttons don't need clicking again, etc.) so now I can't inspect the correct elements (i.e. the login button was hidden because I already logged in).
+Open incognito mode in your browser and navigate to the page.
