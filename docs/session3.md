@@ -56,7 +56,7 @@ Ok, you cushion your chair, oil your keyboard and code out an API for your model
 DO NOT use SSH with passwords. There is no excuse, always use public/private key pairs for SSH authentication. Stress this to anyone who gives you SSH access with a password. You can use the public key you have on your Github for SSH access, so people who are giving you access can use tools like [ssh-import-id](http://man.he.net/man1/ssh-import-id-gh) to import your keys just by knowing your Github username.
 :::
 
-The code for this version of your endeavour can be found [here](https://github.com/KlemenVovk/ids-tutoring-s3/tree/master/live_demo/2_api). The only thing we added is a script for the API:
+The only thing we added to the previous chapter code is a script for the API:
 ```python
 from predict import predict_one # the function from our predict.py script
 from fastapi import FastAPI
@@ -114,12 +114,14 @@ The noisy neighbor problem can happen with many resources, not just RAM, but als
 
 Again, you figure there has to be a better way to do this. You agree with IT that you don't need a machine with 8GB of RAM for your simple model, and your VM is therefore hogging resources it doesn't need, but you also need isolation from others and don't want to return to the pre-VM era. After some googling you run into the concept of containers, which seems like it's exactly what you need. Recall, virtual machines emulate entire operating systems, providing isolation but incurring higher resource overhead and longer startup times. Think of VMs as mini-computers within your computer. On the other hand, containers encapsulate applications and their dependencies, sharing the host OS kernel. They are lightweight and start almost instantly. Picture containers as self-sufficient, portable packages that can run consistently across various environments. For data scientists, the choice boils down to resource efficiency and ease of deployment – VMs offer stronger isolation but at a cost, while containers provide agility and consistency with minimal overhead.
 
+To give you some ballpark numbers: VMs can take minutes to boot, containers start in seconds. VMs usually use 20 GBs of disk space (whole OS + everything you install), containers use a (few) hundred megabytes. VMs at minimum require 2GB or 4GB of RAM, containers use a (few) tens to a (few) hundred megabytes at most. Of course, containers can also be very heavy and slow, depending on the applications they are running.
+
 :::note
-Containers are not strictly better than VMs. Sometimes you NEED a VM. For example, you might need to run a Windows only application - this isn't really feasible with docker containers. It's even worse if you need an older Windows version like Windows XP. In these cases you would turn to a VM.
+Containers are not strictly better than VMs. Sometimes you NEED a VM. For example, you might need to run a Windows only application - this isn't really feasible with docker containers. It's even worse if you need an older Windows version like Windows XP. In these cases you would turn to a VM. If you don't need the degree of isolation that VMs provide, and you don't need to run non-Linux stuff, it's a good idea to try with a container first, and use a VM only as a last resort.
 :::
 
 :::danger
-While VMs and containers offer isolation, you have to be careful. For example if a VM is connected to your network, then if someone breaks into the VM, it automatically has network access to all the other devices in your network. Same goes for mappping folders - sometimes you want to map a folder from your host to a VM. This means that if a virus happens to get into the mapped directory, it is also on the host!
+While VMs and containers offer isolation, you have to be careful. For example if a VM is connected to your network, then if someone breaks into the VM, it automatically has network access to all the other devices in your network. Same goes for mapping folders - sometimes you want to map a folder from your host to a VM. This means that if a virus happens to get into the mapped directory, it is also on the host!
 :::
 
 So to run our API we need a Python installation with the libraries from requirements.txt and the code. In other words we need to perform the following:
@@ -130,7 +132,7 @@ So to run our API we need a Python installation with the libraries from requirem
 
 We need to define a container that will perform the above steps. A container is defined by a `Dockerfile` (a nice cheatsheet for everything Docker is available [here](https://dockerlabs.collabnix.com/docker/cheatsheet/)). From the Dockerfile you can build container images. You can then use these images to launch a container.
 
-Let's tackle step 1. We need to find a base container image. We need an OS with Python. If we search [Docker Hub](https://hub.docker.com/) (a repository of container images) for Python we find the [offical Python container image](https://hub.docker.com/_/python)
+Let's tackle step 1. We need to find a base container image. We need an OS with Python. If we search [Docker Hub](https://hub.docker.com/) (a repository of container images) for Python we find the [official Python container image](https://hub.docker.com/_/python)
 
 ![Python on Docker Hub](img/pythonhub.png)
 
@@ -214,6 +216,8 @@ Notice the `-p 4000:8000`. To make our container accessible from the host, we ha
 This is also an advantage of using Docker. You know that Uvicorn by default runs on port 8000. What if you want to have two different APIs (so two different Uvicorns)? Well we can containerize both and run one with `-p 4000:8000` and the other with `-p 5000:8000`. This way we don't have to reconfigure Uvicorn to use a different port. Some applications make it VERY hard to move them to a different port, so this is an easy solution.
 :::
 
+The code for this chapter can be found [here](https://github.com/KlemenVovk/ids-tutoring-s3/tree/master/live_demo/3_containers_basic/api)
+
 ### Chapter 6: simplifying deployment with docker compose
 
 Running `docker build` and `docker run` with the correct parameters quickly becomes cumbersome. This is where `docker compose` comes in. It's a way to define the build and run commands in a single configuration file that we can then deploy with a single command. The file is a YAML file named `docker-compose.yml`.
@@ -254,29 +258,185 @@ docker compose start # starts the containers (if they were stopped at some point
 docker compose stop # stops the containers (but doesn't delete them)
 ```
 
+The code for this chapter can be found [here](https://github.com/KlemenVovk/ids-tutoring-s3/tree/master/live_demo/4_containers_compose).
+
 ### Chapter 7: adding another container into the mix
 
+It starts bothering you that your model is so slow on prediction (remember the `time.sleep(5)` we added to the API to simulate long computation?). There are a lot of common parts for which the dimensions don't change and it would be a good idea the prediction for them. So when someone asks for a prediction that has already been done before, you don't predict the value again, but return the stored value from the original prediction. The correct terminology for this is caching.
+
+To introduce caching, we will use/deploy [Redis](https://redis.io/), which is a key-value database (a dictionary in Python). It's the defacto standard in the industry for such applications. For all you need to know, it's just a REALLY fast dictionary.
+
+Since Redis is a separate application from our API, we will introduce another container. A quick search on the Docker Hub yields the [official Redis image](https://hub.docker.com/_/redis).
+
+![Redis on Docker Hub](img/redishub.png)
+
+:::tip
+Always try to stick to the rule of 1 app per container. Containers are meant to be thin, disposable, and modular. Throwing multiple apps in them makes them a sort of a budget VM.
+:::
+
+Luckily, we don't need any custom tailored solution like we did with our FastAPI container (we don't need to install anything, we just need default Redis). So all we need to do is use that image in our `docker-compose.yml`
+
+```yaml
+version: '3'
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - 4000:8000
+    depends_on:
+      - rediscache
+  rediscache:
+    image: redis:alpine
+    container_name: shiny-redis-cache
+    # Do we need to port forward this? Remember redis is only used "internally" - so inside the docker network from the api container, you are never accessing it from the host, this is why you don't want to port forward here.
+    # ports:
+    #   - 6379:6379
+
+```
+
+Notice the `depends_on:`, this just means that the `rediscache` service must be started before the API, which makes sense, as we want our cache to be accessible, otherwise, the API might try to connect before it's ready and fail.
+
+:::tip
+Always search Docker Hub for premade images that you need to modify as little as possible. Of course, there is nothing stopping you from just starting with a Ubuntu base container image and then installing Redis in that through commands in the Dockerfile, but this is introducing unneeded maintenance.
+
+Also make sure to always read the Docker Hub page of your image as it often contains all the documentation you really need
+:::
+
+Lastly, we just change our `api.py` to first check if the prediction was already made before (and return the saved value), or make the prediction and save it for future use.
+
+```python
+from predict import predict_one
+from fastapi import FastAPI
+import redis
+import time
+
+# Host is the container name - docker compose automatically takes care of networking containers from the same docker-compose.yml file
+r = redis.Redis(host='shiny-redis-cache', port=6379, decode_responses=True)
+app = FastAPI()
+
+@app.get("/predict")
+def predict(x: float, y: float, z: float, material: str, complexity: int, process: str):
+    key = f'{x}-{y}-{z}-{material}-{complexity}-{process}'
+    if r.exists(key):
+        return {'time_min': float(r.get(key))}
+    time.sleep(5) # Simulate a long computation, we'll motivate this later
+    y_pred = predict_one('model.pkl', x, y, z, material, complexity, process)
+    r.set(key, y_pred)
+    return {'time_min': y_pred}
+```
+
+:::info
+You can notice another advantage of Docker and docker-compose. See how we could connect to the Redis container just by using the container name `shiny-redis-cache` as the host instead of some IP? Remember, unless explicitly changed, all containers in the same `docker-compose.yml` file automatically see each other and can communicate. A container can be in multiple networks, or in none for isolation. For further reading see [here](https://docs.docker.com/compose/networking/).
+:::
+
+That's it! Now if we run everything with `docker compose up` (see how we still use only 1 command?), our API will cache predictions and return the saved value if possible, making our API far more responsive.
+
+:::danger
+Caching is a common source of errors in practice. Be careful with it, and introduce it at the very end. If possible, test without cache. For example: if you change the model, it's possible that the cache would still be returning the old value (from the previous model)...
+:::
+
+The code for this chapter can be found [here](https://github.com/KlemenVovk/ids-tutoring-s3/tree/master/live_demo/5_containers_redis).
 
 ### Chapter 8: persisting container data
 
+You are happy with your caching, however, you would like to persist the cache between restarts of the container. Also, you would like to be able to change the model while the container is live. In other words, you need to save the Redis data on your host, and you need to be able to change the `model.pkl` file live.
+
+:::note
+This is probably not something you would use (you shouldn't really persist cache and change models at the same time), but I included it for DEMO purposes.
+:::
+
+This is where you use volumes and volume mapping. Similarly, as we mapped the port from host to a container, we can also map a directory from the host to a directory inside a container. So any changes on any end are immediately visible on the other. This mapping is by default bidirectional (reads and writes on both ends are allowed), however it [can be restricted to a readonly etc.](https://docs.docker.com/storage/volumes/#use-a-read-only-volume). Like with ports, the format is `host:port`
+
+```yaml
+version: '3'
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - 4000:8000
+    depends_on:
+      - rediscache
+    volumes:
+      - ./model.pkl:/app/model.pkl
+  rediscache:
+    image: redis:alpine
+    container_name: shiny-redis-cache
+    volumes:
+      - ./redisdata:/data
+    command: redis-server --appendonly yes
+```
+
+Instead of copying the model in the Dockerfile, we chose to map it from host to the container. We don't need to change any of our Python code, as the `model.pkl` file will be accessible in the same place as before. The Python app (nor the container) don't know that this is actually a file on the host machine.
+
+Similarly, we mapped the `/data` folder inside the Redis container (this is where Redis by default stores its DB, seen on the Redis container image Docker Hub page) to a folder `redisdata` on the host. This way, when we delete the container, the data stays, and when a new container is started, it uses the data from the previous one.
+
+The code for this chapter can be found [here](https://github.com/KlemenVovk/ids-tutoring-s3/tree/master/live_demo/6_containers_persistence)
+
+
 ### Chapter 9: using environment variables for configuration and passing secrets
 
-Mention that being able to run docker means you are root - and you wouldnt get access to this or devops would take over from here once you create the container etc.
+Lastly, we would like to secure our Redis database. This is usually not needed in practice, as the Redis container isn't even accessible from the outside (remember we didn't forward any ports for the Redis container, therefore it can only be accessed from other containers in the `docker-compose.yml` file.).
 
-Mention the possibilities now such as scaling, auto restarts, different ports, logging, noisy neighbor problem
+A password is sensitive data, remember when we talked about [using environment variables and .env files for sensitive data (specifically python-dotenv library)](http://localhost:3000/ids-tutoring/session1#useful-external-libraries)? Looking at the Redis documentation, the password can be set with an environment variable `REDIS_PASSWORD`. Let's create an `.env` file for this
+```yaml
+REDIS_PORT: 6379
+REDIS_PASSWORD: thisverysecuredemopassword
+```
 
+I also added `REDIS_PORT` (on which port of the container Redis listens) just to show that this can be used for configuration as well. Now we just tell docker compose to use this env file for the api and for the rediscache container.:
 
-## Terminology
+```yaml
+version: '3'
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - 4000:8000
+    depends_on:
+      - rediscache
+    volumes:
+      - ./model.pkl:/app/model.pkl
+    env_file:
+     - .env
+    # You could also use 'environment' instead of env_file etc., but this is not safe for sensitive data as docker-compose.yml is usually stored in a repository.
+    # environment:
+    #  - REDIS_PASSWORD=redispassword
+  rediscache:
+    image: redis:alpine
+    container_name: shiny-redis-cache
+    volumes:
+      - ./redisdata:/data
+    # Notice how we use the REDIS_PASSWORD variable here, because the command is the last thing that is run when the container is started, therefore the env_file and variables from it are already imported and we can use them.
+    command: redis-server --appendonly yes --requirepass $REDIS_PASSWORD
+    env_file:
+      - .env
+```
 
+The last thing to do is to tell Python to look for the Redis password in the `REDIS_PASSWORD` environment variable. Here we don't need to use `python-dotenv` library, as the `.env` file is already loaded by docker compose! Modifying the `api.py` file:
 
-## General tips
+```python
+...
+r = redis.Redis(host='shiny-redis-cache', port=6379, decode_responses=True, password=os.environ['REDIS_PASSWORD'])
+...
+```
+That's it. Again, we run the stack with `docker compose up`.
 
-## FAQ
-### Question
-answer
+At this point we have covered many basic concepts of Docker. However there are many more, don't be afraid to delve into the documentation.
 
+The code for this chapter can be found [here](https://github.com/KlemenVovk/ids-tutoring-s3/tree/master/live_demo/7_containers_env).
 
-## TODO
-- mention devcontainers
-- mention scaling/kubernetes
-- mention vagrant
+## Further steps
+
+To mention some possible next steps that we can discuss turing the tutoring session:
+- multistage builds
+- scaling
+- container orchestrators (Kubernetes)
+- deployment to the cloud
+- devcontainers
+- [awesome-selfhosted](https://github.com/awesome-selfhosted/awesome-selfhosted)
