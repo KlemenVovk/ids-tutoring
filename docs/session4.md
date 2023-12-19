@@ -76,22 +76,22 @@ For the rest of this session, we will focus only on relational databases, using 
   - **Durability** - once a transaction is committed, its effects are permanent surviving system failures, crashes, power outages...
 - **ORM** - Object Relational Mapping is a programming technique that allows developers to interact with a relational databases in a natural, object-oriented way. Concretely, instead of writing raw SQL commands and having nested lists of values in Python, we map each row from a table in a database to an object in our programming language of choice. More about these later.
 
-## SQL
+## Structured Query Language (SQL)
 
 To interface with a relational database (in our case SQLite) we use SQL. Without delving to deep, we divide it into the following subsets:
 - **Data Query Language (DQL)** - for retrieving data from the database. e.g. `SELECT * FROM Courses`,
 - **Data Manipulation Language (DML)** - for changing/deleting/inserting data into a database, e.g. `INSERT INTO Courses(<columns>) VALUES (<values>)`,
 - **Data Definition Language (DDL)** - for defining and managing the structure of a database, e.g. `CREATE TABLE Courses(<columns>)`,
 - **Data Control Language (DCL)** - for controlling access/permissions to the database, e.g. `GRANT <privilege> ON <object> TO <user>`,
-- **Transaction Control Lanugage (TCL)** - for managing transactions, e.g. `COMMIT` or `ROLLBACK` or `SAVEPOINT`.
+- **Transaction Control Language (TCL)** - for managing transactions, e.g. `COMMIT` or `ROLLBACK` or `SAVEPOINT`.
 
-As a data scientist you should be proficient mainly with DQL and DML, as this is how you get and save/change data.
+As a data scientist you should be proficient mainly with DQL and DML, as this is how you get and save/change data. We will also take a look at DDL to explain how tables are formed and skip DCL and TCL.
 
 :::danger
-Different relational DBMS may vary in functionality, always refer to the (SQL) documentation of your specific DBMS (e.g. PostgreSQL)!
+Different relational DBMS may vary in supported functionality (i.e. Postgres supports more data types like a network address type or JSONB). Furthermore, the syntax of the SQL might differ a bit (e.g. some DBMS use `||` for concatenating strings, while MySQL doesn't support it and uses the `CONCAT()` function instead). Always refer to the documentation of your specific DBMS (e.g. PostgreSQL)!
 :::
 
-### DQL
+### Data Query Language (DQL)
 The only statement you need to know here is `SELECT` and its various clauses for ordering, filtering, etc. Let's take a look at a few examples. You can delve deeper in the [PostgreSQL SELECT documentation](https://www.postgresql.org/docs/current/sql-select.html).
 
 #### Example 1
@@ -270,45 +270,298 @@ ORDER BY
 LIMIT 100; -- limit output to 100 rows, since they are sorted, we get 100 most recent orders
 ```
 
-### DML
+### Data Manipulation Language (DML)
 
+From the DML subset you should be familiar at least with `INSERT`, `UPDATE`, `DELETE`.
 
+Starting with `INSERT` for adding new data into tables:
 
+```sql
+INSERT INTO products (product_name, quantity_in_stock, unit_price)
+VALUES ('Smartphone', 50, 599.99);
+```
+Notice how here, we specify which columns we are providing values for.
 
-## A full example
+We can also update existing data with `UPDATE`:
+```sql
+UPDATE products
+SET unit_price = 649.99
+WHERE product_id = 101;
+```
 
-Instead of dumping a bunch of theory (as you can Google that and there are many resources far better than what I would've written), we will do a full example (from database design to implementation and querying).
+Finally, we are able to delete rows with `DELETE`:
+```sql
+DELETE FROM products
+WHERE quantity_in_stock < 10;
+```
 
-### The problem - FRI course registration system
-Design a database to manage student enrollments to different courses and their achieved grades. The system should store information about the students, the courses, the instructors as well as student enrollments (and grades).
-
-:::note
-Designing databases is hard, and there are jobs/career paths that specialize only in database design/admin, so do not underestimate this task.
+:::info
+You have to be mindful when using DELETE. If you are deleting rows from a table, that is in a relationship with another table, then the other table might be corrupted (foreign keys don't exist anymore). SQL offers several ways to deal with this (`CASCADE` - delete the referenced rows too, `SET NULL` - set the foreign keys to null etc.). What method is used is defined as a constraint when the tables are first created. If you want to know more, check out [this page](https://www.postgresql.org/docs/current/ddl-constraints.html).
 :::
 
-### The proposed schema
-![DB schema](img/dbschema.png)
+### Data Definition Language (DDL)
 
-Drawn with [dbdesigner.net](https://dbdesigner.net). This type of diagram is also referred to as an ERD (Entity Relationship Diagram).
+From the DDL subset you should mainly be familiar with three statements: `CREATE`, `ALTER`, and `DROP`.
 
-The schema shows 4 tables. Initially, reading the problem definition, one might think we only need 3 tables (Courses, Students, Instructors). However, if we examine the relationship cardinalities:
-- Courses-Instructors = N:1 (each course has exactly one instructor, but each instructor may teach multiple courses),
-- Courses-Students = N:M (each course can have multiple students, and each student can be enrolled in multiple courses).
+Creating a simple users table might look like:
+```sql
+CREATE TABLE users (
+    user_id INT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
+    password VARCHAR(100), -- THIS MUST BE HASHED AND NOT PLAINTEXT!
+    email VARCHAR(100)
+);
+```
+Notice how we specify the data type for each column (int - whole number, VARCHAR(x) - string of length at most x). Additionally, we specify some properties that should hold for the column (i.e. usernames should be unique) - these are referred to as constraints and you can read more about them [here](https://www.postgresql.org/docs/current/ddl-constraints.html). Constraints enable the database to enforce the structure even more than just a simple table (i.e. we could have a constraint that checks that the price column is positive or not null - required etc.). You must also mark any primary or foreign keys, as this is how you model relationships!
 
-Many-to-many relationships (N:M) in relational databases are modeled by introducing a new table C, such that A:C has cardinality 1:M and C:B has cardinality N:1. Conveniently, rows in this intermediary table have a practical meaning (mapping) - enrollments. Also notice how we have already defined the data types - relational databases require such rigorous definitions ahead of time to ensure that all data is in a consistent format later (otherwise the transaction fails).
+Changing a table might look like:
+```sql
+-- ALTER statement to add a new column to an existing table
+ALTER TABLE users
+ADD COLUMN is_admin BOOLEAN;
+ADD CONSTRAINT unique_email UNIQUE (email);
+```
 
-:::note
-Database schema design is much more in depth than what we will show (e.g. notice how the arrows connecting the tables above have different signs on the ends - this is to model the cardinality of the relationship). There are also multiple levels we can model on (logical, physical, conceptual). Should you want to know more, take a look [here](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model).
-:::
-
-
-
-
+We can delete a table with `DROP`:
+```sql
+DROP TABLE obsolete_table;
+```
 
 ## SQLite
+To support the live demo we introduce SQLite. We will use it during the demo as it's one of the easiest DBMS to set up. More formally, SQLite is a serverless relational DBMS. This means that we don't need a service (usually a container) that would run it. The whole database is stored on disk as a single `databasename.db` file. Originally, it's written in C, but many wrappers for other languages exist. Python has the [sqlite3](https://docs.python.org/3/library/sqlite3.html) module in the standard library so no additional installation is needed.
+
+:::tip
+Since SQLite is available by default and is stored in a single file directly on disk, it's perfect for quick prototyping, or writing/testing the application first and then just changing the database connection to a more capable DBMS.
+:::
+
+:::note
+SQLite like the name implies is very lightweight, and doesn't have all the bells and whistles that other DBMS may have. It also uses a dialect of SQL, but for the majority of transactions you will be doing, there is no difference.
+:::
+
+Taking a look at a simple example:
+```python
+import sqlite3
+
+# Step 1: Create a SQLite database (or connect to an existing one)
+conn = sqlite3.connect('example.db')
+
+# Step 2: Create a cursor object to interact with the database
+cursor = conn.cursor()
+
+# Step 3: Create a table
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT NOT NULL
+    )
+''')
+
+# Step 4: Insert multiple rows of data into the table
+users_data = [
+    ('john_doe', 'john@example.com'),
+    ('jane_smith', 'jane@example.com'),
+    ('bob_jones', 'bob@example.com')
+]
+
+# ? get replaced by actual values in order (left to right) - parametrized queries, best practice!
+cursor.executemany("INSERT INTO users (username, email) VALUES (?, ?)", users_data)
+
+# Step 5: Perform a basic query to retrieve all users
+cursor.execute("SELECT * FROM users")
+all_users = cursor.fetchall()
+
+print("All Users:")
+for user in all_users:
+    print(user)
+
+# Step 6: Perform a query to retrieve a specific user by email
+cursor.execute("SELECT * FROM users WHERE email=?", ('jane@example.com',))
+jane = cursor.fetchone()
+
+if jane:
+    print(f"\nUser found: {jane}")
+else:
+    print("\nUser not found.")
+
+# Step 7: Delete a user by username
+cursor.execute("DELETE FROM users WHERE username=?", ('bob_jones',))
+
+# Step 8: Commit the changes and close the connection
+conn.commit()
+conn.close()
+```
+
+Changing to a different relational DBMS would probably require only changing the connection in the first step (depending on the DBMS and the library).
+
+:::danger
+Notice how in the example we are not using Python's string formatting (like f-strings or concatenation with +), but instead we are using `?` as placeholders. This is an SQL feature and is referred to as parametrized queries. It's best practice to use it because it's way safer. Let's demonstrate why!
+:::
+
+## Security detour - SQL injections
+We've mentioned that you should never use f-strings or manual concatenation and should always use parametrized queries with ? to insert the values. Why? Let's consider a simple example:
+
+```python
+# User input (potentially from an untrusted source like a web application frontend)
+username = "klemen"
+
+# Insecure string formatting (DO NOT USE THIS)
+query = f"SELECT * FROM users WHERE username = '{username}'"
+cursor.execute(query)
+```
+
+versus
+
+```python
+# User input (potentially from an untrusted source like a web application frontend)
+username = "klemen"
+
+# Parameterized query (SAFE)
+query = "SELECT * FROM users WHERE username = ?"
+cursor.execute(query, (username,))
+```
+
+These two approaches look the same right? Yet, I'm claiming that you should never use the first approach. Well for usernames like "klemen" there really is no difference. However, if someone enters something malicious in the username field in the web application, i.e. `'; DROP TABLE users; --` then the above query gets resolved to:
+```sql
+SELECT * FROM users WHERE username = ''; DROP TABLE users; --'
+```
+So in the username field, we entered a `';` to finish the terminate the username string and finish the first statement and then we added another statement `DROP TABLE USERS;` and added a comment after that so that everything behind this is thrown away (the last `'` in the original query). Doing this, an attacker has just deleted our users table from a simple input field on the webpage.
+
+This method of attack has been historically very popular and even has a name - SQL injection.
+
+Using parametrized queries with ? instead of f-strings or manual concatenation sanitizes the queries so that injections as above cannot happen. In short, ? ensure that anything they are replaced with is interpreted only as a parameter (a string) and not SQL code.
+
+To further illustrate that this is a real concern, let's take a look at the official University of Ljubljana digital identity management web page availabile at [id.uni-lj.si/DigitalnaIdentiteta](https://id.uni-lj.si/DigitalnaIdentiteta).
+
+![digital identity management page](img/digitalidentity.png)
+
+Screenshot taken on 2023-12-19.
+
+Notice under the Change password card, `Your password must also not contain the following character combinations: script, select, insert, update, delete, drop, --, ', /*, */`. You can recognize the SQL statements and the SQL comment (`--`). This is to prevent SQL injections. Merely asking the users not to do this is NOT the way to go and hopefully, query sanitization is done in the background to ensure that injections can't happen.
 
 ## ORM (Object Relational Mapping)
 
+In the SQLite section we've seen how to work with databases programatically. However writing the queries by hand feels kind of clunky. Surely there exists an alternative. This is where ORMs come in.
+
+In short, an ORM is a way to map a row from a table to a class in your programming language. A well known ORM library for Python is [SQLAlchemy](https://www.sqlalchemy.org/).
+
+Take a look at an SQLite example without an ORM:
+
+```python
+import sqlite3
+
+# Connect to the SQLite database
+conn = sqlite3.connect('example.db')
+cursor = conn.cursor()
+
+# Create a table
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT NOT NULL
+    )
+''')
+
+# Insert data into the table
+cursor.execute("INSERT INTO users (username, email) VALUES (?, ?)", ('john_doe', 'john@example.com'))
+
+# Query data
+cursor.execute("SELECT * FROM users")
+users = cursor.fetchall()
+
+# Print the results
+for user in users:
+    print(user)
+
+# Close the connection
+conn.close()
+```
+
+Nothing new, now let's introduce SQLAlchemy:
+
+```python
+from sqlalchemy import create_engine, Column, Integer, String, select
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
+
+# Create a SQLAlchemy engine
+engine = create_engine('sqlite:///example.db', echo=True)
+
+# Create a base class for declarative models
+Base = declarative_base()
+
+# Define a User class as a model
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+
+# Create the table in the database
+Base.metadata.create_all(engine)
+
+# Create a session
+session = Session(engine)
+
+# Insert data into the table using ORM
+new_user = User(username='john_doe', email='john@example.com')
+session.add(new_user)
+session.commit()
+
+# Query data using ORM
+users = session.query(User).all()
+
+# Print the results
+for user in users:
+    print((user.id, user.username, user.email))
+
+# Close the session
+session.close()
+```
+
+Both give the following output:
+```
+(1, 'john_doe', 'john@example.com')
+```
+
+However SQLAlchemy also provides a log of actual SQL statements being executed in the background:
+```
+2023-12-19 10:18:17,791 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-12-19 10:18:17,791 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("users")
+2023-12-19 10:18:17,791 INFO sqlalchemy.engine.Engine [raw sql] ()
+2023-12-19 10:18:17,792 INFO sqlalchemy.engine.Engine PRAGMA temp.table_info("users")
+2023-12-19 10:18:17,792 INFO sqlalchemy.engine.Engine [raw sql] ()
+2023-12-19 10:18:17,793 INFO sqlalchemy.engine.Engine 
+CREATE TABLE users (
+        id INTEGER NOT NULL, 
+        username VARCHAR NOT NULL, 
+        email VARCHAR NOT NULL, 
+        PRIMARY KEY (id)
+)
 
 
-## General tips
+2023-12-19 10:18:17,793 INFO sqlalchemy.engine.Engine [no key 0.00010s] ()
+2023-12-19 10:18:17,797 INFO sqlalchemy.engine.Engine COMMIT
+2023-12-19 10:18:17,798 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-12-19 10:18:17,799 INFO sqlalchemy.engine.Engine INSERT INTO users (username, email) VALUES (?, ?)
+2023-12-19 10:18:17,800 INFO sqlalchemy.engine.Engine [generated in 0.00014s] ('john_doe', 'john@example.com')
+2023-12-19 10:18:17,800 INFO sqlalchemy.engine.Engine COMMIT
+2023-12-19 10:18:17,805 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-12-19 10:18:17,806 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email 
+FROM users
+2023-12-19 10:18:17,806 INFO sqlalchemy.engine.Engine [generated in 0.00016s] ()
+(1, 'john_doe', 'john@example.com')
+```
+
+You can immediately see that we haven't written any SQL statements as SQLAlchemy does that in the background and now we have an object-oriented interface to our database. Writing SQL statements manually has been replaced with creating classes and calling functions. Another, more implicit benefit is that now we have IntelliSense support (our IDE knows the data types as it can look them up in the class definition), making the developer experience better.
+
+## Useful tools for working with databases
+- [dbdiagram.io](https://dbdiagram.io/) - for drawing DB schemas that can be directly exported to SQL statements and vice-versa.
+- [DBeaver](https://dbeaver.io/) - a tool for exploring databases (supports multiple DBMS).
+- [phpMyAdmin](https://www.phpmyadmin.net/) - web-based administration tool for MySQL and MariaDB DBMS.
+
+
+## Further practice
+- [SQL on HackerRank](https://www.hackerrank.com/domains/sql)
+- [SQLZoo](https://www.sqlzoo.net/wiki/SQL_Tutorial)
